@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evaluation — FraudLens</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img src="/static/favicon.svg" alt="" width="28" height="28"> FraudLens</a>
+    <nav aria-label="Main">
+      <a href="/">Analyse</a>
+      <a href="/report" aria-current="page">Evaluation</a>
+      <a href="/docs">API</a>
+    </nav>
+  </header>
+  <main class="report">
+    <section class="panel">
+      <h1>How accurate is FraudLens?</h1>
+      <p class="muted" id="generated">Loading evaluation report…</p>
+      <p id="report-error" class="error" role="alert" hidden></p>
+      <div class="cards" id="headline"></div>
+    </section>
+    <section class="panel">
+      <h2>1. Held-out scenario set</h2>
+      <p class="muted" id="holdout-desc"></p>
+      <div id="holdout-table"></div>
+      <h3>Every error on this set</h3>
+      <div id="holdout-errors"></div>
+    </section>
+    <section class="panel">
+      <h2>2. Development scenario set</h2>
+      <p class="muted">Used while building the rules, so these numbers are optimistic. Kept as a regression test.</p>
+      <div id="dev-table"></div>
+      <h3>Errors</h3>
+      <div id="dev-errors"></div>
+    </section>
+    <section class="panel">
+      <h2>3. Public data and new attacks</h2>
+      <p class="muted">Threat-intelligence lookup switched off, so these measure the rules + machine learning alone.</p>
+      <div id="public-table"></div>
+      <p id="fresh"></p>
+    </section>
+    <section class="panel">
+      <h2>4. Machine-learning models alone</h2>
+      <div id="ml-table"></div>
+    </section>
+    <section class="panel">
+      <h2>5. Threat intelligence</h2>
+      <p id="intel"></p>
+    </section>
+    <section class="panel">
+      <h2>6. Limitations</h2>
+      <ul id="limitations"></ul>
+    </section>
+  </main>
+  <footer class="footer small muted">Flagged = risk score of 30 or more (medium or high). <a href="/api/report">Raw JSON</a></footer>
+  <script src="/static/report.js"></script>
+</body>
+</html>

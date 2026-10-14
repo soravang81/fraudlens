@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FraudLens — Phishing &amp; Digital Fraud Detector</title>
+  <meta name="description" content="Paste a suspicious SMS, WhatsApp message, email or link. FraudLens explains whether it is phishing or fraud and what to do.">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img src="/static/favicon.svg" alt="" width="28" height="28"> FraudLens</a>
+    <nav aria-label="Main">
+      <a href="/" aria-current="page">Analyse</a>
+      <a href="/report">Evaluation</a>
+      <a href="/docs">API</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="panel input-panel" aria-labelledby="input-title">
+      <h1 id="input-title">Is this message a scam?</h1>
+      <p class="muted">Paste an SMS, WhatsApp message, email (with or without headers) or a link. You'll get a risk level, the reasons, and what to do next.</p>
+
+      <form id="analyze-form" novalidate>
+        <label for="content" class="label">Suspicious message, email or URL</label>
+        <textarea id="content" name="content" rows="9" maxlength="20000" required
+                  placeholder="e.g. Dear customer, your SBI account will be blocked today. Update KYC at http://sbi-kyc-update.xyz"></textarea>
+        <div class="row between">
+          <span id="char-count" class="muted small" aria-live="polite">0 / 20,000</span>
+          <button type="button" id="clear-btn" class="btn-link">Clear</button>
+        </div>
+
+        <fieldset class="samples">
+          <legend class="label">Try an example</legend>
+          <div class="chips" id="samples"></div>
+        </fieldset>
+
+        <label class="check">
+          <input type="checkbox" id="live">
+          <span><strong>Live link check</strong> — follow redirects and look up the domain's age. This contacts the link's server from ours (never from your device).</span>
+        </label>
+
+        <button type="submit" id="submit-btn" class="btn-primary">Analyse</button>
+        <p id="form-error" class="error" role="alert" hidden></p>
+      </form>
+
+      <p class="privacy small muted">Privacy: submissions are analysed in memory and never stored or logged on the server. Your history below stays in this browser only.</p>
+    </section>
+
+    <section class="panel result-panel" aria-labelledby="result-title" aria-live="polite">
+      <h2 id="result-title" class="visually-hidden">Result</h2>
+      <div id="empty-state" class="empty">
+        <p class="empty-title">Results appear here</p>
+        <p class="muted">FraudLens combines rule checks, a machine-learning model, look-alike domain detection and public threat feeds (OpenPhish, URLhaus).</p>
+      </div>
+      <div id="loading" class="loading" hidden><span class="spinner" aria-hidden="true"></span> Analysing…</div>
+      <div id="result" hidden>
+        <div class="verdict" id="verdict">
+          <div>
+            <p class="verdict-label" id="verdict-level"></p>
+            <p class="verdict-summary" id="verdict-summary"></p>
+          </div>
+          <div class="score" aria-label="Risk score">
+            <span id="score-value"></span><span class="small">/100</span>
+          </div>
+        </div>
+        <div class="meter" aria-hidden="true"><div class="meter-fill" id="meter-fill"></div></div>
+        <div class="chips" id="scenario-chips"></div>
+
+        <h3>What to do</h3>
+        <ul id="advice" class="advice"></ul>
+
+        <h3>Why — the indicators</h3>
+        <ul id="indicators" class="indicators"></ul>
+
+        <div id="email-block" hidden>
+          <h3>Email headers</h3>
+          <dl id="email-meta" class="meta"></dl>
+        </div>
+
+        <div id="url-block" hidden>
+          <h3>Links found</h3>
+          <div id="urls"></div>
+        </div>
+
+        <p class="small muted" id="timing"></p>
+      </div>
+    </section>
+
+    <section class="panel history-panel" aria-labelledby="history-title">
+      <div class="row between">
+        <h2 id="history-title">Your recent checks</h2>
+        <div class="row gap">
+          <label class="check small"><input type="checkbox" id="history-toggle" checked> Keep history</label>
+          <button type="button" id="history-clear" class="btn-link">Clear history</button>
+        </div>
+      </div>
+      <p id="history-empty" class="muted small">Nothing yet. Checks you run are listed here (stored only in this browser).</p>
+      <ul id="history" class="history"></ul>
+    </section>
+  </main>
+
+  <footer class="footer small muted">
+    FraudLens is a prototype. It can be wrong: always verify through official channels. Lost money? Call <strong>1930</strong> or report at cybercrime.gov.in.
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

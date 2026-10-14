@@ -1,0 +1,34 @@
+{
+  "text": {
+    "n": 4028,
+    "precision": 0.9601,
+    "recall": 0.9726,
+    "f1": 0.9663,
+    "roc_auc": 0.9969,
+    "accuracy": 0.9742,
+    "tp": 1493,
+    "tn": 2431,
+    "fp": 62,
+    "fn": 42,
+    "false_positive_rate": 0.0249,
+    "false_negative_rate": 0.0274,
+    "dataset": "ealvaradob/phishing-dataset texts.json (emails + SMS), 80/20 stratified split, seed 42",
+    "train_seconds": 72.1
+  },
+  "url": {
+    "n": 60000,
+    "precision": 0.9295,
+    "recall": 0.941,
+    "f1": 0.9352,
+    "roc_auc": 0.9869,
+    "accuracy": 0.939,
+    "tp": 26406,
+    "tn": 29935,
+    "fp": 2004,
+    "fn": 1655,
+    "false_positive_rate": 0.0627,
+    "false_negative_rate": 0.059,
+    "dataset": "ealvaradob/phishing-dataset urls.json, random 300000 URLs, 80/20 stratified split, seed 42; scheme and www. stripped",
+    "train_seconds": 195.1
+  }
+}
