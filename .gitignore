@@ -6,3 +6,4 @@ data/raw/
 data/intel/
 .vercel/
 .DS_Store
+.vercel

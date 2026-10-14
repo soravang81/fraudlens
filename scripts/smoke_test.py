@@ -20,9 +20,9 @@ def get(base, path, data=None):
                                  headers={"content-type": "application/json"})
     try:
         with opener.open(req, timeout=20) as r:
-            return r.status, dict(r.headers), r.read()
+            return r.status, {k.lower(): v for k, v in r.headers.items()}, r.read()
     except urllib.error.HTTPError as e:
-        return e.code, dict(e.headers), e.read()
+        return e.code, {k.lower(): v for k, v in e.headers.items()}, e.read()
 
 
 def check(base):
@@ -40,6 +40,12 @@ def check(base):
     health = json.loads(body)
     expect("health", status == 200 and all(health["models"].values()), json.dumps(health["intel_counts"]))
     expect("security headers", "default-src 'self'" in headers.get("content-security-policy", ""))
+    status, headers, _ = get(base, "/docs")
+    expect("API docs can load Swagger", status == 200 and "cdn.jsdelivr.net" in headers.get("content-security-policy", ""), str(status))
+    status, _, _ = get(base, "/favicon.ico")
+    expect("GET /favicon.ico", status == 200, str(status))
+    _, _, css = get(base, "/static/styles.css")
+    expect("hidden elements stay hidden", b"[hidden]" in css)
 
     cases = [
         ("Dear customer your HDFC account is suspended. Verify KYC now at http://hdfc-kyc-verify.top/login", "high"),

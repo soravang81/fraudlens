@@ -30,7 +30,14 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="FraudLens", version="1.0.0", lifespan=lifespan,
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; "
+       "base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
+# FastAPI's Swagger page loads its bundle from jsDelivr and boots it with an inline script.
+DOCS_CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://fastapi.tiangolo.com; "
+            "connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
+
+app = FastAPI(title="FraudLens", version="1.0.0", lifespan=lifespan, redoc_url=None,
               description="Explainable phishing and digital-fraud detection for messages, emails and URLs.")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 _hits: dict[str, deque] = defaultdict(deque)
@@ -47,9 +54,7 @@ async def security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; "
-        "base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
+    response.headers["Content-Security-Policy"] = DOCS_CSP if request.url.path == "/docs" else CSP
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store"
     return response
@@ -104,6 +109,11 @@ def report():
 @app.get("/", include_in_schema=False)
 def index():
     return FileResponse(STATIC / "index.html")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(STATIC / "favicon.svg", media_type="image/svg+xml")
 
 
 @app.get("/report", include_in_schema=False)
