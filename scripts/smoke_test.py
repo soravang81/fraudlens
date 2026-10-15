@@ -33,7 +33,8 @@ def check(base):
         failures += not ok
         print(f"{'PASS' if ok else 'FAIL'}  {name}  {detail}")
 
-    for path in ("/", "/report", "/static/app.js", "/static/styles.css", "/static/report.js", "/api/report"):
+    for path in ("/", "/app", "/report", "/static/app.js", "/static/landing.js", "/static/styles.css", "/static/dashboard.css",
+                 "/static/landing.css", "/static/report.js", "/api/report", "/api/scenarios"):
         status, _, body = get(base, path)
         expect(f"GET {path}", status == 200, f"{status} {len(body)}B")
     status, headers, body = get(base, "/api/health")
@@ -52,6 +53,7 @@ def check(base):
         ("482910 is your OTP for HDFC Bank NetBanking. Do not share this OTP with anyone.", "low"),
         ("https://paypa1-secure-login.com/signin", "high"),
         ("https://www.irctc.co.in/nget/train-search", "low"),
+        ("Arnazon prime renewal failed, update card", "high"),
     ]
     for text, want in cases:
         start = time.perf_counter()
@@ -61,6 +63,9 @@ def check(base):
                f"got {r.get('level')} score={r.get('score')} {1000 * (time.perf_counter() - start):.0f}ms round trip")
     status, _, _ = get(base, "/api/analyze", {"content": ""})
     expect("empty input rejected", status == 422, str(status))
+    status, _, body = get(base, "/api/batch", {"items": ["arnazon.com", "Hi, are we meeting at 6?"]})
+    levels = [x.get("level") for x in json.loads(body).get("results", [])] if status == 200 else []
+    expect("batch", levels == ["high", "low"], f"{status} {levels}")
     return failures
 
 

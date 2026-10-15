@@ -47,6 +47,14 @@ SCENARIOS = {
                             ["Don't enter passwords or OTPs on pages opened from a message.",
                              "Go to the site by typing its address yourself or using the official app.",
                              "If you entered a password, change it now and turn on two-factor authentication."]),
+    "brand_impersonation": ("Brand impersonation (look-alike name)",
+                            ["Look closely at the spelling: 'arnazon', 'paypa1' and 'g00gle' are not the real companies.",
+                             "Open the company's official app or type its website yourself instead of using anything in the message.",
+                             "Real companies never ask you to update card details through a message link."]),
+    "account_alert": ("Fake account / payment problem",
+                      ["Payment-failed and unusual-sign-in alerts are easy to fake. Check inside the official app, not via the message.",
+                       "Never re-enter card details or passwords on a page opened from a message.",
+                       "If you already entered card details, call your bank to block the card."]),
     "malware": ("Malware link",
                 ["Don't open the link or download anything from it.",
                  "If you already downloaded a file, don't run it; scan your device."]),
@@ -76,6 +84,10 @@ def detect_scenarios(ids: set[str], intel_types: set[str]) -> list[str]:
             s.append(name)
     if ids & {"payment_request", "unusual_payment"}:
         s.append("payment_request")
+    if "lookalike_brand" in ids:
+        s.append("brand_impersonation")
+    if "account_problem" in ids and "bank_kyc" not in s:
+        s.append("account_alert")
     if ids & {"credential_request", "brand_mismatch", "lookalike", "sender_brand_mismatch", "punycode"} and "bank_kyc" not in s:
         s.append("credential_phishing")
     if any("malware" in t for t in intel_types):

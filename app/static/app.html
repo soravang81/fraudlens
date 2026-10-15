@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard — FraudLens</title>
+  <meta name="description" content="Check suspicious SMS, WhatsApp messages, emails and links for phishing and fraud, with every reason explained.">
+  <meta name="theme-color" content="#060913">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><span class="grid"></span><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span></div>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Dashboard navigation">
+      <a class="brand" href="/"><img src="/static/favicon.svg" alt="" width="30" height="30"> FraudLens</a>
+      <nav class="nav" id="nav">
+        <span class="nav-label">Workspace</span>
+        <a href="#overview" data-view="overview"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Overview</a>
+        <a href="#analyse" data-view="analyse"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Analyse</a>
+        <a href="#bulk" data-view="bulk"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Bulk check</a>
+        <a href="#history" data-view="history"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9.7 9.7 0 00-6.7 2.8L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg>History<span class="count" id="nav-count" hidden></span></a>
+        <span class="nav-label">Learn</span>
+        <a href="#learn" data-view="learn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Scam library &amp; quiz</a>
+        <a href="#accuracy" data-view="accuracy"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/></svg>Accuracy</a>
+        <a href="/docs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>API docs</a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="help-card">Lost money to a scam? Call<b>1930</b>or report at cybercrime.gov.in, as fast as possible.</div>
+        <a class="btn-ghost btn-small" href="/">← Back to home</a>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <div class="main">
+      <header class="main-top">
+        <button class="menu-btn" id="menu-btn" type="button" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div><h1 id="view-title">Overview</h1><p id="view-sub"></p></div>
+        <span class="spacer"></span>
+        <a class="btn-primary inline" href="#analyse">+ New check</a>
+      </header>
+
+      <main class="views">
+        <!-- Overview -->
+        <section class="view" id="view-overview" aria-label="Overview">
+          <div class="stack">
+            <div class="welcome">
+              <h2>Stay one step ahead of scammers</h2>
+              <p>Paste anything suspicious (an SMS, a WhatsApp forward, an email or a link) and get a verdict with every reason explained.</p>
+              <form class="quick" id="quick-form">
+                <label for="quick-input" class="visually-hidden">Quick check</label>
+                <input id="quick-input" placeholder="Paste a message or link for a quick check…" autocomplete="off">
+                <button class="btn-primary inline" type="submit">Check now</button>
+              </form>
+              <svg class="art" viewBox="0 0 24 24" fill="none" stroke="#c7d2fe" stroke-width="1"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div class="kpis">
+              <div class="kpi total"><span class="glow"></span><div class="lbl">Checks run</div><div class="val" id="kpi-total">0</div></div>
+              <div class="kpi high"><span class="glow"></span><div class="lbl">High risk</div><div class="val" id="kpi-high">0</div></div>
+              <div class="kpi medium"><span class="glow"></span><div class="lbl">Medium risk</div><div class="val" id="kpi-medium">0</div></div>
+              <div class="kpi low"><span class="glow"></span><div class="lbl">Low risk</div><div class="val" id="kpi-low">0</div></div>
+            </div>
+            <div class="grid-3">
+              <div class="panel">
+                <div class="row between"><h2>Your last 7 days</h2><span class="small muted">checks per day</span></div>
+                <div class="activity" id="activity"></div>
+              </div>
+              <div class="panel">
+                <h2>Risk mix</h2>
+                <div class="donut-wrap mt" id="donut-wrap"></div>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="panel">
+                <div class="row between"><h2>Scam types you've met</h2></div>
+                <div class="hbars mt" id="scam-bars"></div>
+              </div>
+              <div class="panel">
+                <div class="row between"><h2>Recent checks</h2><a class="btn-link" href="#history">View all</a></div>
+                <ul class="mini-list mt" id="recent"></ul>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="row between"><h2>How reliable is FraudLens?</h2><a class="btn-link" href="#accuracy">Full evaluation</a></div>
+              <div class="cards" id="mini-accuracy"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analyse -->
+        <section class="view" id="view-analyse" aria-label="Analyse">
+          <div class="grid-2">
+            <section class="panel input-panel" aria-labelledby="input-title">
+              <h2 id="input-title" class="visually-hidden">Check a message</h2>
+              <form id="analyze-form" novalidate>
+                <label for="content" class="label">Suspicious message, email or URL</label>
+                <div class="field" id="field">
+                  <textarea id="content" name="content" rows="9" maxlength="20000" required
+                            placeholder="e.g. Dear customer, your SBI account will be blocked today. Update KYC at http://sbi-kyc-update.xyz"></textarea>
+                  <span class="scanline" aria-hidden="true"></span>
+                </div>
+                <div class="row between">
+                  <span id="char-count" class="muted small" aria-live="polite">0 / 20,000</span>
+                  <span class="row gap"><button type="button" id="paste-btn" class="btn-link">Paste</button><button type="button" id="clear-btn" class="btn-link">Clear</button></span>
+                </div>
+                <fieldset class="samples">
+                  <legend class="label">Try an example</legend>
+                  <div class="chips" id="samples"></div>
+                </fieldset>
+                <label class="check">
+                  <input type="checkbox" id="live">
+                  <span><strong>Live link check</strong> — follow redirects and look up the domain's age. This contacts the link's server from ours (never from your device).</span>
+                </label>
+                <button type="submit" id="submit-btn" class="btn-primary">Analyse <span class="small dim">⌘↵</span></button>
+                <p id="form-error" class="error" role="alert" hidden></p>
+              </form>
+              <p class="privacy small muted">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+                <span>Analysed in memory, never stored or logged. History stays in this browser.</span>
+              </p>
+            </section>
+
+            <section class="panel result-panel" aria-labelledby="result-title" aria-live="polite">
+              <h2 id="result-title" class="visually-hidden">Result</h2>
+              <div id="empty-state" class="empty">
+                <div class="shield" aria-hidden="true">
+                  <span class="ring"></span><span class="ring"></span><span class="ring"></span>
+                  <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.6"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><circle cx="11.5" cy="11.5" r="3"/><path d="M14 14l2.5 2.5" stroke="#22d3ee"/></svg>
+                </div>
+                <p class="empty-title">Results appear here</p>
+                <p class="muted">Wording checks, two machine-learning models, look-alike detection and public threat feeds, with every reason shown.</p>
+              </div>
+              <div id="loading" class="loading" hidden>
+                <div class="radar" aria-hidden="true"></div>
+                <ul class="steps" id="steps">
+                  <li>Undoing tricks like “K.Y.C” and hxxp</li>
+                  <li>Checking wording and disguised brand names</li>
+                  <li>Running the language model</li>
+                  <li>Inspecting links and domains</li>
+                </ul>
+              </div>
+              <div id="result" hidden>
+                <div class="verdict" id="verdict">
+                  <div class="gauge" aria-hidden="true">
+                    <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="gauge-fill" cx="60" cy="60" r="52"/></svg>
+                    <div class="value"><div><b id="score-value">0</b><span>of 100</span></div></div>
+                  </div>
+                  <div>
+                    <p class="verdict-label" id="verdict-level"></p>
+                    <p class="verdict-summary" id="verdict-summary"></p>
+                    <div class="chips" id="scenario-chips"></div>
+                    <div class="signals" id="signals"></div>
+                  </div>
+                </div>
+
+                <div class="result-actions">
+                  <button class="btn-ghost btn-small" type="button" id="copy-btn">Copy summary</button>
+                  <button class="btn-ghost btn-small" type="button" id="share-btn">Share warning</button>
+                  <button class="btn-ghost btn-small" type="button" id="download-btn">Download report</button>
+                </div>
+
+                <div id="marked-block">
+                  <h3>Your message, marked up</h3>
+                  <div class="marked" id="marked"></div>
+                  <div class="mark-key"><span class="w">Warning sign</span><span class="s">Reassuring sign</span><span class="l">Link</span></div>
+                </div>
+
+                <div id="breakdown-block">
+                  <h3>Where the score comes from</h3>
+                  <div class="breakdown-bar" id="breakdown-bar" role="img"></div>
+                  <ul class="legend" id="breakdown-legend"></ul>
+                </div>
+
+                <h3>What to do</h3>
+                <ul id="advice" class="advice stagger"></ul>
+
+                <h3>Why — the indicators</h3>
+                <ul id="indicators" class="indicators stagger"></ul>
+
+                <div id="email-block" hidden>
+                  <h3>Email headers</h3>
+                  <dl id="email-meta" class="meta"></dl>
+                </div>
+
+                <div id="url-block" hidden>
+                  <h3>Links found</h3>
+                  <div id="urls" class="stagger"></div>
+                </div>
+                <p class="small muted" id="timing"></p>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- Bulk -->
+        <section class="view" id="view-bulk" aria-label="Bulk check">
+          <div class="stack">
+            <div class="panel">
+              <h2>Check up to 20 messages or links at once</h2>
+              <p class="muted small">Put one item per line, or separate longer messages with a blank line. Useful for clearing out an inbox or a family WhatsApp group.</p>
+              <label for="bulk-input" class="visually-hidden">Messages or links</label>
+              <textarea id="bulk-input" rows="9" placeholder="arnazon.com/order&#10;Your parcel is held, pay Rs 25 redelivery fee at http://indiapost-help.top&#10;Hi, are we meeting at 6?"></textarea>
+              <div class="row between wrap mt">
+                <label class="check small m0"><input type="checkbox" id="bulk-blank"> Split on blank lines (for multi-line messages)</label>
+                <span class="row gap"><button class="btn-ghost btn-small" id="bulk-sample" type="button">Load examples</button><button class="btn-primary inline" id="bulk-run" type="button">Check all</button></span>
+              </div>
+              <p id="bulk-error" class="error" role="alert" hidden></p>
+              <div class="bulk-progress" id="bulk-progress" hidden><i></i></div>
+            </div>
+            <div class="panel" id="bulk-results" hidden>
+              <div class="row between wrap"><h2>Results</h2><button class="btn-ghost btn-small" id="bulk-csv" type="button">Export CSV</button></div>
+              <div class="bulk-summary mt" id="bulk-summary"></div>
+              <div class="table-wrap"><table class="bulk-table"><thead><tr><th>Risk</th><th>Message</th><th>Why</th><th class="num">Score</th></tr></thead><tbody id="bulk-body"></tbody></table></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- History -->
+        <section class="view" id="view-history" aria-label="History">
+          <div class="panel">
+            <div class="toolbar">
+              <label for="history-search" class="visually-hidden">Search history</label>
+              <input type="search" id="history-search" placeholder="Search your checks…">
+              <button class="filter on" data-filter="all" type="button">All</button>
+              <button class="filter" data-filter="high" type="button">High</button>
+              <button class="filter" data-filter="medium" type="button">Medium</button>
+              <button class="filter" data-filter="low" type="button">Low</button>
+            </div>
+            <div class="row between wrap">
+              <label class="check small m0"><input type="checkbox" id="history-toggle" checked> Keep history in this browser</label>
+              <span class="row gap"><button type="button" id="history-export" class="btn-ghost btn-small">Export JSON</button><button type="button" id="history-clear" class="btn-ghost btn-small">Clear all</button></span>
+            </div>
+            <p id="history-empty" class="empty-mini mt">Nothing yet. Checks you run are listed here (stored only in this browser).</p>
+            <ul id="history" class="history"></ul>
+          </div>
+        </section>
+
+        <!-- Learn -->
+        <section class="view" id="view-learn" aria-label="Scam library and quiz">
+          <div class="stack">
+            <div class="panel quiz" id="quiz">
+              <span class="eyebrow"><span class="dot"></span> Spot the scam</span>
+              <h2 class="mt">Can you tell a scam from a real message?</h2>
+              <p class="muted small">8 real-world style messages. Pick an answer, then see what FraudLens found.</p>
+              <div id="quiz-body"></div>
+            </div>
+            <div class="panel">
+              <h2>Red flags to remember</h2>
+              <ul class="flags mt">
+                <li>Anyone asking for an OTP, UPI PIN, CVV or password</li>
+                <li>Pressure: “within 24 hours”, “account will be blocked”</li>
+                <li>Brand names spelled oddly: arnazon, paypa1, g00gle</li>
+                <li>Links that aren't the company's real domain</li>
+                <li>Fees to release a prize, refund, parcel or job</li>
+                <li>“Police / CBI / customs” on a video call (“digital arrest”)</li>
+                <li>Requests to install AnyDesk, TeamViewer or an APK</li>
+                <li>“Keep this secret, don't tell your family or bank”</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h2>Scam library</h2>
+              <p class="muted small">The scam types FraudLens recognises. Tap a card for what to do.</p>
+              <div class="lib mt" id="library"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Accuracy -->
+        <section class="view" id="view-accuracy" aria-label="Accuracy">
+          <div class="report flush">
+            <section class="panel">
+              <h2>Headline numbers</h2>
+              <p class="muted" id="generated">Loading evaluation report…</p>
+              <p id="report-error" class="error" role="alert" hidden></p>
+              <div class="cards" id="headline"></div>
+            </section>
+            <section class="panel fade-in">
+              <h2>1. Public data never used in training</h2>
+              <p class="muted">Threat-intelligence lookup switched off, so these measure the rules and machine learning alone.</p>
+              <div class="bars" id="public-bars"></div>
+              <div class="table-wrap" id="public-table"></div>
+              <p id="fresh"></p>
+            </section>
+            <section class="panel fade-in">
+              <h2>2. Held-out hand-written scenarios</h2>
+              <p class="muted" id="holdout-desc"></p>
+              <div class="table-wrap" id="holdout-table"></div>
+              <h3>Every error on this set</h3>
+              <div class="table-wrap" id="holdout-errors"></div>
+            </section>
+            <section class="panel fade-in">
+              <h2>3. Development scenario set</h2>
+              <p class="muted">Used while building the rules and as a guard when tuning, so these numbers are optimistic. Kept as a regression test.</p>
+              <div class="table-wrap" id="dev-table"></div>
+              <h3>Errors</h3>
+              <div class="table-wrap" id="dev-errors"></div>
+            </section>
+            <section class="panel fade-in">
+              <h2>4. Machine-learning models alone</h2>
+              <div class="table-wrap" id="ml-table"></div>
+              <p class="small muted" id="ml-notes"></p>
+            </section>
+            <section class="panel fade-in">
+              <h2>5. Threat intelligence</h2>
+              <p id="intel"></p>
+            </section>
+            <section class="panel fade-in">
+              <h2>6. Limitations</h2>
+              <ul id="limitations" class="limitations"></ul>
+              <p class="small muted">Raw numbers: <a href="/api/report">/api/report</a></p>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/static/report.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

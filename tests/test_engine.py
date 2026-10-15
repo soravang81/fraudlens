@@ -87,6 +87,41 @@ def test_link_model_alone_does_not_flag_a_harmless_message():
     assert r["level"] == "low"
 
 
+@pytest.mark.parametrize("text", [
+    "arnazon",
+    "Arnazon prime renewal failed, update card",
+    "PayPa1: payment declined. Verify your billing now",
+    "G00gle security alert: unusual sign-in",
+])
+def test_disguised_brand_names_in_text_are_flagged(text):
+    r = analyze(text)
+    assert "lookalike_brand" in ids(r)
+    assert r["level"] in ("medium", "high")
+
+
+@pytest.mark.parametrize("text", [
+    "I bought this on amazon yesterday, amazing deal",
+    "Your Swiggy order is out for delivery",
+    "Let us meet for the finance review in the cloud office",
+    "Amazon: your order has shipped",
+])
+def test_real_brand_names_and_ordinary_words_are_not_lookalikes(text):
+    assert "lookalike_brand" not in ids(analyze(text))
+
+
+def test_plain_typo_counts_less_than_a_disguise():
+    typo = next(i for i in analyze("microsft teams meeting")["indicators"] if i["id"] == "lookalike_brand")
+    disguise = next(i for i in analyze("rnicrosoft teams meeting")["indicators"] if i["id"] == "lookalike_brand")
+    assert typo["weight"] < disguise["weight"]
+
+
+def test_highlights_mark_the_words_that_triggered_warnings():
+    text = "Arnazon prime renewal failed, update card at http://arnazon-pay.top"
+    h = analyze(text)["highlights"]
+    marked = {(text[s["start"]:s["end"]], s["kind"]) for s in h["spans"]}
+    assert ("Arnazon", "warn") in marked and ("http://arnazon-pay.top", "link") in marked
+
+
 def test_redact_masks_personal_data():
     out = redact("mail me at a.b@example.com or call 9876543210")
     assert "example.com" not in out and "9876543210" not in out

@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from .analyzer import intel, ml
+from .analyzer import guidance, intel, ml
 from .analyzer.engine import MAX_CHARS, analyze
 
 BASE = Path(__file__).resolve().parent
@@ -19,6 +19,8 @@ STATIC = BASE / "static"
 REPORT = BASE / "model" / "eval_report.json"
 RATE_LIMIT = 30
 RATE_WINDOW = 60
+BATCH_MAX = 20
+BATCH_ITEM_CHARS = 5000
 
 log = logging.getLogger("fraudlens")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -66,14 +68,14 @@ def _client_ip(request: Request) -> str:
     return fwd.split(",")[-1].strip() if fwd else (request.client.host if request.client else "unknown")
 
 
-def _rate_limited(ip: str) -> bool:
+def _rate_limited(ip: str, cost: int = 1) -> bool:
     now = time.monotonic()
     q = _hits[ip]
     while q and now - q[0] > RATE_WINDOW:
         q.popleft()
-    if len(q) >= RATE_LIMIT:
+    if len(q) + cost > RATE_LIMIT:
         return True
-    q.append(now)
+    q.extend([now] * cost)
     return False
 
 
@@ -92,6 +94,37 @@ def api_analyze(body: AnalyzeRequest, request: Request):
     return result
 
 
+class BatchRequest(BaseModel):
+    items: list[str] = Field(..., min_length=1, max_length=BATCH_MAX, description=f"Up to {BATCH_MAX} messages or URLs")
+
+
+@app.post("/api/batch")
+def api_batch(body: BatchRequest, request: Request):
+    items = [i for i in body.items if i.strip()]
+    if not items:
+        raise HTTPException(status_code=422, detail="Add at least one message or link.")
+    if any(len(i) > BATCH_ITEM_CHARS for i in items):
+        raise HTTPException(status_code=422, detail=f"Each item must be at most {BATCH_ITEM_CHARS:,} characters.")
+    if _rate_limited(_client_ip(request), cost=len(items)):
+        raise HTTPException(status_code=429, detail="Too many requests. Please wait a minute and try again.")
+    results = []
+    for content in items:
+        try:
+            r = analyze(content)
+            results.append({k: r[k] for k in ("score", "level", "summary", "scenarios", "input_type", "signals")})
+        except Exception:
+            log.exception("batch item failed (length %d)", len(content))
+            results.append({"error": "Analysis failed for this item."})
+    counts = {lvl: sum(1 for r in results if r.get("level") == lvl) for lvl in ("high", "medium", "low")}
+    log.info("batch n=%d high=%d medium=%d", len(results), counts["high"], counts["medium"])
+    return {"results": results, "counts": counts}
+
+
+@app.get("/api/scenarios")
+def scenarios():
+    return {"scenarios": [{"id": k, "name": v[0], "advice": v[1]} for k, v in guidance.SCENARIOS.items()]}
+
+
 @app.get("/api/health")
 def health():
     m = intel.meta()
@@ -107,8 +140,13 @@ def report():
 
 
 @app.get("/", include_in_schema=False)
-def index():
-    return FileResponse(STATIC / "index.html")
+def landing():
+    return FileResponse(STATIC / "landing.html")
+
+
+@app.get("/app", include_in_schema=False)
+def dashboard():
+    return FileResponse(STATIC / "app.html")
 
 
 @app.get("/favicon.ico", include_in_schema=False)
@@ -118,4 +156,4 @@ def favicon():
 
 @app.get("/report", include_in_schema=False)
 def report_page():
-    return FileResponse(STATIC / "report.html")
+    return FileResponse(STATIC / "app.html")

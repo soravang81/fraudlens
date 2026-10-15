@@ -194,6 +194,7 @@ LIMITATIONS = [
     "Threat-intel feeds are a snapshot from the deploy date; they must be refreshed (scripts/fetch_intel.py) to stay useful. Host-level matches are skipped for top-ranked platforms to avoid flagging e.g. docs.google.com.",
     "Domain reputation uses the Tranco top-100k list. Compromised legitimate sites and phishing hosted on big platforms (Google Forms, Firebase) get less benefit from reputation and rely on other signals.",
     "The live link check reveals the server's IP to the link owner and can be fooled by sites that cloak (show different content to scanners). It is off by default.",
+    "Brand look-alikes in message text are matched against a fixed list of about 55 brands. A disguised name of a brand not on the list is missed, and a real word one letter away from a brand can be flagged as a 'misspelled brand name' (15 points) until it is added to the exception list.",
     "Only text is analysed: images, voice calls, QR-code images and attachments are not.",
 ]
 

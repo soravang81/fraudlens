@@ -248,7 +248,7 @@ def analyze_url(url: str) -> tuple[ParsedURL | None, list[Hit], dict | None]:
     squat = find_typosquat(p)
     if squat and not misuse:
         target, official = squat
-        add("lookalike", "Look-alike of a well-known domain", 30,
+        add("lookalike", "Look-alike of a well-known domain", 40,
             f"'{p.registered_domain}' imitates '{official}' with small spelling changes.", p.registered_domain)
 
     if p.registered_domain in SHORTENERS:

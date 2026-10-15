@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FraudLens — Spot phishing and fraud before it costs you</title>
+  <meta name="description" content="Paste a suspicious SMS, WhatsApp message, email or link. FraudLens explains whether it is phishing or fraud, why, and what to do next.">
+  <meta name="theme-color" content="#060913">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/landing.css">
+</head>
+<body class="landing">
+  <div class="bg" aria-hidden="true"><span class="grid"></span><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span></div>
+
+  <header class="topbar" id="topbar">
+    <a class="brand" href="/"><img src="/static/favicon.svg" alt="" width="30" height="30"> FraudLens</a>
+    <nav aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#scams">Scams</a>
+      <a href="/app#accuracy">Accuracy</a>
+    </nav>
+    <a class="btn-cta small-cta" href="/app">Open dashboard →</a>
+  </header>
+
+  <main>
+    <section class="l-hero">
+      <div class="l-copy">
+        <span class="eyebrow reveal"><span class="dot"></span> Built for India's SMS, WhatsApp &amp; email scams</span>
+        <h1 class="reveal d1">Spot the scam <br><span class="gradient-text">before it spots you.</span></h1>
+        <p class="lead reveal d2">Paste any suspicious message, email or link. FraudLens tells you how risky it is, shows exactly why, and what to do next, in milliseconds.</p>
+        <form class="l-try reveal d3" action="/app" method="get">
+          <label for="try" class="visually-hidden">Message or link to check</label>
+          <input id="try" name="q" placeholder="Paste a message or link… e.g. arnazon.com/prime" autocomplete="off" required>
+          <button class="btn-cta" type="submit">Check it free</button>
+        </form>
+        <ul class="trust reveal d4">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>No sign-up</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Nothing stored</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Every reason explained</li>
+        </ul>
+      </div>
+
+      <div class="phone-wrap reveal d3" aria-hidden="true">
+        <div class="float-card fc1"><b>‘arnazon’</b> imitates ‘amazon’</div>
+        <div class="float-card fc2"><span class="pill high">HIGH</span> fake KYC link</div>
+        <div class="float-card fc3"><span class="pill low">SAFE</span> genuine OTP</div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="phone-head"><span class="avatar" id="demo-avatar">VM</span><div><b id="demo-sender">VM-SBIUPD</b><small>Text message</small></div></div>
+          <div class="chat" id="demo-chat">
+            <div class="bubble" id="demo-bubble"><span id="demo-text"></span><span class="caret"></span><span class="beam"></span></div>
+            <div class="demo-verdict" id="demo-verdict">
+              <span class="ring-mini"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" class="t"/><circle cx="20" cy="20" r="16" class="f" id="demo-ring"/></svg><b id="demo-score">0</b></span>
+              <div><strong id="demo-level">Analysing…</strong><small id="demo-why"></small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="marquee" id="scams" aria-label="Scam types FraudLens recognises">
+      <div class="track">
+        <span>Fake KYC update</span><span>Digital arrest</span><span>Part-time job tasks</span><span>UPI collect request</span><span>Parcel held at customs</span>
+        <span>Electricity disconnection</span><span>Lottery &amp; KBC prize</span><span>Look-alike domains</span><span>Investment “VIP” groups</span><span>Family on a new number</span>
+        <span>AnyDesk / APK installs</span><span>Disguised brand names</span><span>Instant loan apps</span><span>Fake payment failed</span>
+        <span aria-hidden="true">Fake KYC update</span><span aria-hidden="true">Digital arrest</span><span aria-hidden="true">Part-time job tasks</span><span aria-hidden="true">UPI collect request</span><span aria-hidden="true">Parcel held at customs</span>
+        <span aria-hidden="true">Electricity disconnection</span><span aria-hidden="true">Lottery &amp; KBC prize</span><span aria-hidden="true">Look-alike domains</span><span aria-hidden="true">Investment “VIP” groups</span><span aria-hidden="true">Family on a new number</span>
+        <span aria-hidden="true">AnyDesk / APK installs</span><span aria-hidden="true">Disguised brand names</span><span aria-hidden="true">Instant loan apps</span><span aria-hidden="true">Fake payment failed</span>
+      </div>
+    </section>
+
+    <section class="l-stats" aria-label="Measured accuracy">
+      <div class="l-stat fade-in"><b data-key="urls">–</b><span>of never-seen phishing URLs caught</span></div>
+      <div class="l-stat fade-in"><b data-key="texts">–</b><span>precision on held-out emails &amp; SMS</span></div>
+      <div class="l-stat fade-in"><b data-key="fresh">–</b><span>of live phishing caught without the feed</span></div>
+      <div class="l-stat fade-in"><b data-key="speed">–</b><span>average time per check</span></div>
+    </section>
+
+    <section class="l-section" id="features">
+      <p class="kicker fade-in">Features</p>
+      <h2 class="fade-in">Everything you need to check a message with confidence</h2>
+      <div class="features">
+        <article class="feature fade-in"><div class="f-icon i1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div><h3>Explained verdicts</h3><p>A 0–100 risk score, the scam type, and every warning sign with the exact words that triggered it.</p></article>
+        <article class="feature fade-in"><div class="f-icon i2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h7"/></svg></div><h3>Message marked up</h3><p>Your message is shown with risky phrases, reassuring lines and links highlighted, so you learn the pattern.</p></article>
+        <article class="feature fade-in"><div class="f-icon i3"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg></div><h3>Link intelligence</h3><p>Look-alike and disguised brands (arnazon, paypa1), threat feeds, site reputation and optional live redirect checks.</p></article>
+        <article class="feature fade-in"><div class="f-icon i4"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></div><h3>Bulk check</h3><p>Check up to 20 messages or links at once and export the results as CSV.</p></article>
+        <article class="feature fade-in"><div class="f-icon i5"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></div><h3>Learn &amp; quiz</h3><p>A scam library with what to do for each type, plus a “spot the scam” quiz to train your instincts.</p></article>
+        <article class="feature fade-in"><div class="f-icon i6"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></div><h3>Private by design</h3><p>Analysed in memory, never stored or logged. Your history and dashboard live only in your browser.</p></article>
+      </div>
+    </section>
+
+    <section class="l-section" id="how">
+      <p class="kicker fade-in">How it works</p>
+      <h2 class="fade-in">Four independent checks, one clear answer</h2>
+      <ol class="timeline">
+        <li class="fade-in"><span class="num">1</span><div><h3>Normalise</h3><p>Strip hidden characters and undo disguises like “bl0cked”, “K.Y.C” and hxxp://.</p></div></li>
+        <li class="fade-in"><span class="num">2</span><div><h3>Read the wording</h3><p>20+ Indian-context scam patterns, disguised brand names and email-header checks (SPF, DKIM, Reply-To).</p></div></li>
+        <li class="fade-in"><span class="num">3</span><div><h3>Two machine-learning models</h3><p>A language model and a URL model trained on 770,000 labelled examples, tuned on data kept apart from testing.</p></div></li>
+        <li class="fade-in"><span class="num">4</span><div><h3>Inspect every link</h3><p>Threat feeds (OpenPhish, URLhaus), top-site reputation, look-alike domains, and optional live redirect and domain-age checks.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="l-section">
+      <p class="kicker fade-in">FAQ</p>
+      <h2 class="fade-in">Questions people ask</h2>
+      <div class="faq">
+        <details class="fade-in"><summary>Is my message stored anywhere?</summary><p>No. It's analysed in memory and discarded. Server logs record only the risk level, score and time. Your history is kept in your own browser and you can switch it off.</p></details>
+        <details class="fade-in"><summary>How accurate is it?</summary><p>Every number is measured on data never used for training and published on the Accuracy page, including every mistake on our hand-written test set. It is a strong second opinion, not a guarantee.</p></details>
+        <details class="fade-in"><summary>What should I do if I already paid or shared an OTP?</summary><p>Call 1930 (National Cyber Crime Helpline) immediately and report at cybercrime.gov.in. Then call your bank on its official number to block cards and UPI.</p></details>
+        <details class="fade-in"><summary>Can developers use it?</summary><p>Yes. There's a JSON API (<code>POST /api/analyze</code> and <code>POST /api/batch</code>). See the API docs.</p></details>
+      </div>
+    </section>
+
+    <section class="l-cta fade-in">
+      <h2>Got a message you're not sure about?</h2>
+      <p>Check it in seconds, and share the warning with family.</p>
+      <a class="btn-cta" href="/app#analyse">Check a message now</a>
+    </section>
+  </main>
+
+  <footer class="footer small muted">
+    FraudLens is a prototype and can be wrong: always verify through official channels. Lost money? Call <strong>1930</strong> or report at cybercrime.gov.in. · <a href="/docs">API</a> · <a href="/app#accuracy">Accuracy</a>
+  </footer>
+  <script src="/static/landing.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-15T14:53:16+00:00",
+  "generated_at": "2026-10-15T16:22:46+00:00",
   "flag_threshold": 30,
   "scenarios": {
     "full": {
@@ -216,9 +216,9 @@
         }
       },
       "latency_ms": {
-        "mean": 1.68,
-        "p95": 2.94,
-        "max": 54.22
+        "mean": 2.49,
+        "p95": 4.26,
+        "max": 69.01
       }
     },
     "rules_only": {
@@ -235,16 +235,16 @@
       "false_negative_rate": 0.15,
       "high_only": {
         "n": 110,
-        "tp": 27,
+        "tp": 28,
         "tn": 50,
         "fp": 0,
-        "fn": 33,
+        "fn": 32,
         "precision": 1.0,
-        "recall": 0.45,
-        "f1": 0.6207,
-        "accuracy": 0.7,
+        "recall": 0.4667,
+        "f1": 0.6364,
+        "accuracy": 0.7091,
         "false_positive_rate": 0.0,
-        "false_negative_rate": 0.55
+        "false_negative_rate": 0.5333
       },
       "errors": [
         {
@@ -476,9 +476,9 @@
         }
       },
       "latency_ms": {
-        "mean": 0.93,
-        "p95": 2.38,
-        "max": 3.48
+        "mean": 1.56,
+        "p95": 3.74,
+        "max": 5.34
       }
     },
     "description": "110 hand-written, labelled Indian-context messages, emails and URLs (60 malicious incl. obfuscated/modified variants, 50 legitimate incl. real OTP/bank alerts). Flagged = score >= 30."
@@ -498,16 +498,16 @@
       "false_negative_rate": 0.0909,
       "high_only": {
         "n": 45,
-        "tp": 16,
+        "tp": 17,
         "tn": 22,
         "fp": 1,
-        "fn": 6,
-        "precision": 0.9412,
-        "recall": 0.7273,
-        "f1": 0.8205,
-        "accuracy": 0.8444,
+        "fn": 5,
+        "precision": 0.9444,
+        "recall": 0.7727,
+        "f1": 0.85,
+        "accuracy": 0.8667,
         "false_positive_rate": 0.0435,
-        "false_negative_rate": 0.2727
+        "false_negative_rate": 0.2273
       },
       "errors": [
         {
@@ -679,23 +679,23 @@
         }
       },
       "latency_ms": {
-        "mean": 1.12,
-        "p95": 2.81,
-        "max": 3.36
+        "mean": 1.82,
+        "p95": 3.93,
+        "max": 4.76
       }
     },
     "rules_only": {
       "n": 45,
-      "tp": 15,
+      "tp": 16,
       "tn": 22,
       "fp": 1,
-      "fn": 7,
-      "precision": 0.9375,
-      "recall": 0.6818,
-      "f1": 0.7895,
-      "accuracy": 0.8222,
+      "fn": 6,
+      "precision": 0.9412,
+      "recall": 0.7273,
+      "f1": 0.8205,
+      "accuracy": 0.8444,
       "false_positive_rate": 0.0435,
-      "false_negative_rate": 0.3182,
+      "false_negative_rate": 0.2727,
       "high_only": {
         "n": 45,
         "tp": 5,
@@ -753,17 +753,6 @@
           "text": "Electricity department: Your meter is not updated. Your light will be cut at 10 pm tonight. Download the Bill Update app from the link we will send on WhatsApp.",
           "top_reasons": [
             "Mentions a well-known company"
-          ]
-        },
-        {
-          "id": "h19",
-          "type": "false_negative",
-          "category": "novel_obfuscated",
-          "score": 0,
-          "level": "low",
-          "text": "Y0ur P@ytm w@llet is susp3nded. Pr0vide y0ur UPI P1N to re-activ@te immediately.",
-          "top_reasons": [
-            "Urgency or time pressure"
           ]
         },
         {
@@ -855,7 +844,7 @@
         },
         "novel_obfuscated": {
           "n": 1,
-          "correct": 0
+          "correct": 1
         },
         "otp_legit": {
           "n": 2,
@@ -895,9 +884,9 @@
         }
       },
       "latency_ms": {
-        "mean": 0.94,
-        "p95": 2.57,
-        "max": 3.13
+        "mean": 1.56,
+        "p95": 4.01,
+        "max": 5.14
       }
     },
     "description": "45 hand-written, labelled Indian-context messages, emails and URLs (22 malicious incl. obfuscated/modified variants, 23 legitimate incl. real OTP/bank alerts). Flagged = score >= 30."
@@ -1067,7 +1056,8 @@
     "Threat-intel feeds are a snapshot from the deploy date; they must be refreshed (scripts/fetch_intel.py) to stay useful. Host-level matches are skipped for top-ranked platforms to avoid flagging e.g. docs.google.com.",
     "Domain reputation uses the Tranco top-100k list. Compromised legitimate sites and phishing hosted on big platforms (Google Forms, Firebase) get less benefit from reputation and rely on other signals.",
     "The live link check reveals the server's IP to the link owner and can be fooled by sites that cloak (show different content to scanners). It is off by default.",
+    "Brand look-alikes in message text are matched against a fixed list of about 55 brands. A disguised name of a brand not on the list is missed, and a real word one letter away from a brand can be flagged as a 'misspelled brand name' (15 points) until it is added to the exception list.",
     "Only text is analysed: images, voice calls, QR-code images and attachments are not."
   ],
-  "runtime_seconds": 16.1
+  "runtime_seconds": 24.2
 }

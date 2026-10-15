@@ -1,5 +1,7 @@
 "use strict";
 
+(() => {
+
 const $ = (id) => document.getElementById(id);
 const pct = (x) => (x == null ? "—" : `${(x * 100).toFixed(1)}%`);
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -74,7 +76,7 @@ function errorTable(errors) {
 }
 
 function render(r) {
-  $("generated").textContent = `Generated ${new Date(r.generated_at).toLocaleString()} · flagged = score ≥ ${r.flag_threshold}. Every number below is recomputed by scripts/evaluate.py.`;
+  $("generated").textContent = `Generated ${new Date(r.generated_at).toLocaleString()} · flagged = score ≥ ${r.flag_threshold}. Every number here is recomputed by scripts/evaluate.py.`;
   const u = r.heldout_urls, t = r.heldout_texts, h = r.holdout.full;
   $("headline").replaceChildren(
     card("Unseen phishing URLs caught", u.recall * 100, `${u.tp} of ${u.tp + u.fn}, precision ${pct(u.precision)}`),
@@ -125,11 +127,25 @@ function observe() {
   nodes.forEach((n) => io.observe(n));
 }
 
-fetch("/api/report")
-  .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Report not available yet."))))
-  .then(render)
-  .catch((e) => {
-    $("generated").textContent = "";
-    $("report-error").textContent = e.message;
-    $("report-error").hidden = false;
-  });
+let reportPromise = null;
+function getReport() {
+  reportPromise = reportPromise || fetch("/api/report")
+    .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Report not available yet."))));
+  return reportPromise;
+}
+
+let rendered = false;
+function showAccuracy() {
+  if (rendered) { observe(); return; }
+  getReport()
+    .then((r) => { rendered = true; render(r); })
+    .catch((e) => {
+      reportPromise = null;
+      $("generated").textContent = "";
+      $("report-error").textContent = e.message;
+      $("report-error").hidden = false;
+    });
+}
+
+window.FraudLensReport = { getReport, showAccuracy, card, pct };
+})();

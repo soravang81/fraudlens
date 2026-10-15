@@ -1,6 +1,6 @@
 # FraudLens — explainable phishing & digital-fraud detection
 
-**Live:** [fraudlens-topaz.vercel.app](https://fraudlens-topaz.vercel.app) · evaluation at [/report](https://fraudlens-topaz.vercel.app/report) · API docs at [/docs](https://fraudlens-topaz.vercel.app/docs)
+**Live:** [fraudlens-topaz.vercel.app](https://fraudlens-topaz.vercel.app) · dashboard at [/app](https://fraudlens-topaz.vercel.app/app) · evaluation at [/report](https://fraudlens-topaz.vercel.app/report) · API docs at [/docs](https://fraudlens-topaz.vercel.app/docs)
 
 Paste an SMS, a WhatsApp message, a raw email (headers included) or a link. FraudLens returns:
 
@@ -8,7 +8,22 @@ Paste an SMS, a WhatsApp message, a raw email (headers included) or a link. Frau
 - the **scam type**: fake KYC, digital arrest, fake job, investment, prize, delivery, government impersonation and more;
 - **every indicator**, with the exact evidence and a plain-language explanation;
 - **where the score came from** (wording, language model, links, email headers, combined signals);
-- a per-link breakdown and **what to do next**, including India's 1930 helpline and cybercrime.gov.in.
+- a per-link breakdown and **what to do next**, including India's 1930 helpline and cybercrime.gov.in;
+- your **message marked up**, with the risky phrases, reassuring lines and links highlighted.
+
+## Pages and API
+
+| Path | What it is |
+|---|---|
+| `/` | Landing page with a live demo (real verdicts from the API) |
+| `/app` | Dashboard with a sidebar: overview (KPIs, 7-day activity, risk mix, scam types met), analyse, bulk check, history (search, filter, export), scam library and quiz, accuracy |
+| `/report` | The dashboard opened on the accuracy view |
+| `POST /api/analyze` | Analyse one message, email or link |
+| `POST /api/batch` | Analyse up to 20 items (5,000 characters each); each item counts against the rate limit |
+| `GET /api/scenarios` | Scam types with advice |
+| `GET /api/report` | The evaluation report as JSON |
+
+History and the overview are built from the browser's own localStorage; nothing is sent to or kept on the server.
 
 Built for the CC6-AI05 brief "Intelligent Phishing and Digital Fraud Detection".
 
@@ -45,7 +60,8 @@ The one regression is a new false alarm on the hand-written held-out set: a genu
 input ─► normalise (NFKC, zero-width strip, refang hxxp/[.] , undo "K.Y.C"/"bl0cked")
       ├─► raw email? ─► header checks: display-name brand vs sender domain, free-mail "official",
       │                 Reply-To / Return-Path mismatch, SPF / DKIM / DMARC failures
-      ├─► text rules  ─► 20 weighted Indian-context fraud patterns + "genuine message" patterns
+      ├─► text rules  ─► 20+ weighted Indian-context fraud patterns + "genuine message" patterns,
+      │                 disguised brand names in the text ("arnazon", "PayPa1", "G00gle", "pay-tm")
       ├─► text ML     ─► TF-IDF word 1–2-grams + logistic regression; top contributing words shown
       └─► each link   ─► threat intel (OpenPhish, URLhaus), Tranco top-100k reputation,
                          brand-on-wrong-domain, typosquat (edit distance + homoglyph skeleton),
@@ -66,6 +82,8 @@ Data: Hugging Face `ealvaradob/phishing-dataset` (Apache-2.0).
 
 - false alarms at or under 2% on URLs and under 4.5% on texts;
 - the hand-written development set at no misses and at most 6 of its 50 legitimate messages flagged.
+
+**Look-alike brand names.** A word whose letters, after undoing common look-alike swaps (rn→m, vv→w, cl→d, 0→o, 1→l), spell one of about 55 brands is a *disguised brand name* (30 points, +10 when the message also has a link or asks you to log in, pay or fix your account). A plain one-letter typo of a brand ("microsft") is weaker evidence and gets 15. A short list of real words that happen to be one letter from a brand ("delivery", "amazing", "finance", "cloud") is never flagged. Look-alike *domains* (`arnazon.com`) get 40 points from the URL rules.
 
 A link inside a message that otherwise reads as harmless gets no points from the URL model, only from the URL rules. A message counts as harmless when the text model scores it low and it asks you to do nothing: click, call, pay or share. This one change cut false alarms on legitimate emails by more than half.
 
@@ -111,6 +129,7 @@ The rate limit (30 analyses/minute per IP) is in memory, so on multi-instance ho
 - Genuine bank and delivery alerts can score medium. These alerts are also what limits recall: weighting the text model more heavily would catch more phishing but flag them.
 - Phishing hosted on big shared platforms gets less help from reputation.
 - A phishing link sent with completely innocent wording is judged on its URL rules alone.
+- Brand look-alikes in text are checked against a fixed list of about 55 brands.
 - Only text is analysed: no images, QR codes, attachments or calls.
 
 The full list is in `REPORT.md`.

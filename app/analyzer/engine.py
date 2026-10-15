@@ -5,7 +5,7 @@ import time
 from . import guidance, live_check, ml
 from .email_rules import analyze_email, looks_like_raw_email
 from .normalize import deobfuscate, extract_emails, extract_phones, extract_urls, normalize_text, refang
-from .text_rules import Hit, run_text_rules
+from .text_rules import Hit, highlight_spans, lookalike_hit, run_text_rules
 from .url_rules import analyze_url, parse
 
 MAX_CHARS = 20000
@@ -15,7 +15,9 @@ MAX_URLS = 10
 ACTION_IDS = {
     "credential_request", "payment_request", "kyc", "link_cta", "remote_access", "unusual_payment", "prize", "job",
     "investment", "threat", "contact_switch", "family_impersonation", "delivery", "loan", "secrecy",
+    "account_problem", "lookalike_brand",
 }
+HIGHLIGHT_LIMIT = 5000
 LEVELS = ((60, "high"), (30, "medium"), (0, "low"))
 
 
@@ -58,6 +60,9 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
     is_url_only = len(urls) == 1 and link_text.strip().rstrip("/") in (urls[0].rstrip("/"), "http://" + urls[0].rstrip("/"), "https://" + urls[0].rstrip("/"))
 
     text_hits = [] if is_url_only else run_text_rules(clean)
+    disguised = None if is_url_only else lookalike_hit(body)
+    if disguised:
+        text_hits.append(disguised)
     ids = {h.id for h in text_hits}
     if not is_url_only and not urls and not (ids & ACTION_IDS) and not email_summary:
         text_hits.append(Hit("no_action", "No link and no request for action", -10,
@@ -119,6 +124,8 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
         combo += 10
     if "payment_request" in ids and ids & {"job", "prize", "loan", "investment"}:
         combo += 10
+    if "lookalike_brand" in ids and (urls or ids & {"account_problem", "credential_request", "payment_request", "threat"}):
+        combo += 10
     link_points = best_url_points if urls else 0
     raw = lang_points + email_points + ml_points + combo + link_points
     score = max(0, min(100, raw))
@@ -146,6 +153,9 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
         "breakdown": {"wording": lang_points, "email_headers": email_points, "language_model": ml_points,
                       "combinations": combo, "links": link_points, "threat_intel": bool(intel_types),
                       "benign_context": benign_context},
+        "signals": [name for name, pts in (("wording", lang_points), ("language model", ml_points), ("links", link_points),
+                                             ("email headers", email_points)) if pts > 0] + (["threat intelligence"] if intel_types else []),
+        "highlights": _highlights(body, text_hits, urls),
         "indicators": indicators,
         "urls": url_reports,
         "email": email_summary,
@@ -155,6 +165,27 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
         "elapsed_ms": round((time.perf_counter() - started) * 1000, 1),
         "input_type": "email" if email_summary else ("url" if is_url_only else "message"),
     }
+
+
+def _highlights(body: str, hits: list[Hit], urls: list[str]) -> dict:
+    """The message as typed, with the parts that triggered warnings marked (first 5,000 characters)."""
+    text = body[:HIGHLIGHT_LIMIT]
+    kinds = {h.id: ("safe" if h.weight < 0 else "warn") for h in hits}
+    spans = [(s, e, rid) for s, e, rid in highlight_spans(text, {i for i in kinds if i != "lookalike_brand"})]
+    for h in hits:
+        if h.id == "lookalike_brand":
+            spans += [(s, e, h.id) for s, e in h.spans]
+    for u in urls:
+        i = text.find(u)
+        if i >= 0:
+            spans.append((i, i + len(u), "link"))
+    spans.sort(key=lambda s: (s[0], -(s[1] - s[0])))
+    merged, end = [], -1
+    for s, e, rid in spans:
+        if s >= end and e <= len(text):
+            merged.append({"start": s, "end": e, "id": rid, "kind": "link" if rid == "link" else kinds.get(rid, "warn")})
+            end = e
+    return {"text": text, "spans": merged, "truncated": len(body) > HIGHLIGHT_LIMIT}
 
 
 def _live(url: str, parsed, hits: list[Hit]) -> dict:

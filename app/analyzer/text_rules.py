@@ -2,6 +2,8 @@
 import re
 from dataclasses import dataclass, field
 
+from .lookalike import find_in_text
+
 
 @dataclass(frozen=True)
 class Rule:
@@ -22,6 +24,7 @@ class Hit:
     explanation: str
     evidence: list[str] = field(default_factory=list)
     category: str = "language"
+    spans: list[tuple[int, int]] = field(default_factory=list)
 
     def as_dict(self) -> dict:
         return {
@@ -84,6 +87,12 @@ RULES: tuple[Rule, ...] = (
           r"\bcollect request\b", r"\bapprove (?:the )?(?:payment|request)\b", r"\benter (?:your )?upi pin to receive\b",
           r"\bscan (?:the )?qr\b[^.\n]{0,30}\b(?:receive|get|refund|cashback)\b",
           r"\bpay (?:now|immediately|today)\b", r"\bpending (?:bill|dues|payment)\b")),
+    Rule("account_problem", "Claims a problem with your account, payment or subscription", 15,
+         "'Payment declined', 'renewal failed' or 'unusual sign-in' messages push you to re-enter card or login details on a fake page.",
+         (r"\b(?:renewal|payment|transaction|auto-?pay|billing|subscription|membership)\b[^.\n]{0,25}\b(?:failed|declined|unsuccessful|on hold|expired|suspended|cancell?ed|could not be processed)\b",
+          r"\bupdate (?:your |the )?(?:card|payment|billing|bank)(?: (?:details|info(?:rmation)?|method|card))?\b",
+          r"\bunusual (?:sign[- ]?in|log ?in|activity)\b", r"\b(?:account|wallet) (?:is |has been )?(?:on hold|limited|restricted|locked)\b",
+          r"\b(?:verify|confirm) (?:your )?(?:identity|account|billing|payment)\b", r"\bunauthori[sz]ed (?:transaction|login|access)\b")),
     Rule("prize", "Prize, lottery or unexpected reward", 20,
          "You cannot win a lottery or lucky draw you never entered.",
          (r"\b(?:you have|you've|u have) (?:won|been selected)\b", r"\blottery\b", r"\blucky (?:draw|winner|customer)\b",
@@ -171,14 +180,45 @@ def _snippet(text: str, m: re.Match) -> str:
 def run_text_rules(text: str) -> list[Hit]:
     hits: list[Hit] = []
     for rule, pats in _COMPILED:
-        evidence = []
+        evidence, shown = [], []
         for p in pats:
             m = p.search(text)
-            if m:
+            if m and not any(s - 25 <= m.start() and m.end() <= e + 25 for s, e in shown):
                 evidence.append(_snippet(text, m))
+                shown.append(m.span())
             if len(evidence) >= 2:
                 break
         if evidence:
             hits.append(Hit(rule.id, rule.label, rule.weight, rule.explanation, evidence, rule.category))
     suppressed = {s for rule, _ in _COMPILED if rule.suppresses and any(h.id == rule.id for h in hits) for s in rule.suppresses}
     return [h for h in hits if h.id not in suppressed]
+
+
+def lookalike_hit(text: str) -> Hit | None:
+    """Brand names disguised with swapped letters, checked on the text as typed (before de-obfuscation)."""
+    found = find_in_text(text)
+    if not found:
+        return None
+    words = "; ".join(f"'{w}' imitates '{b}'" for w, (b, _), _, _ in found[:3])
+    spans = [(s, e) for _, _, s, e in found]
+    if any(kind == "disguised" for _, (_, kind), _, _ in found):
+        return Hit("lookalike_brand", "Disguised brand name", 30,
+                   f"{words}. Real companies spell their own name correctly; scammers swap in look-alike characters "
+                   "(rn for m, 1 for l, 0 for o) so the name still looks familiar but slips past filters.",
+                   [w for w, _, _, _ in found[:3]], "impersonation", spans)
+    return Hit("lookalike_brand", "Misspelled brand name", 15,
+               f"{words}. This may be an honest typo, but scam messages often misspell brand names on purpose.",
+               [w for w, _, _, _ in found[:3]], "impersonation", spans)
+
+
+def highlight_spans(text: str, ids: set[str]) -> list[tuple[int, int, str]]:
+    """Where each matched rule appears in the text the user typed (obfuscated matches may be missed)."""
+    out = []
+    for rule, pats in _COMPILED:
+        if rule.id not in ids:
+            continue
+        for p in pats:
+            for m in p.finditer(text):
+                if m.end() > m.start():
+                    out.append((m.start(), m.end(), rule.id))
+    return out
