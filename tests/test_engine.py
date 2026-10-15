@@ -75,6 +75,18 @@ def test_obfuscation_is_undone_for_wording_but_not_links():
     assert extract_urls("visit paypa1-login.com") == ["paypa1-login.com"]
 
 
+def test_word_like_country_endings_in_sentences_are_not_links():
+    assert extract_urls("Just now saw your message.it k da") == []
+    assert extract_urls("pay at paypal.me/fixer now") == ["paypal.me/fixer"]
+    assert extract_urls("message.it") == ["message.it"]
+
+
+def test_link_model_alone_does_not_flag_a_harmless_message():
+    r = analyze("Hi team, the meeting notes are on http://www.newsisfree.com/click/-1,8622124,215/ see you at 5")
+    assert r["breakdown"]["benign_context"] is True
+    assert r["level"] == "low"
+
+
 def test_redact_masks_personal_data():
     out = redact("mail me at a.b@example.com or call 9876543210")
     assert "example.com" not in out and "9876543210" not in out

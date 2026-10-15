@@ -7,12 +7,18 @@ const SAMPLES = [
   { label: "UPI refund", text: "Your electricity refund of Rs 2,450 is approved. Enter your UPI PIN to receive the amount in the collect request sent to you." },
   { label: "Look-alike link", text: "https://paypa1-secure-login.com/signin?account=verify" },
   { label: "Phishing email", text: "From: \"HDFC Bank Security\" <alerts@hdfc-secure-mail.top>\nReply-To: support.hdfcbank@gmail.com\nSubject: Urgent: Unusual login detected\nAuthentication-Results: mx.example.com; spf=fail; dkim=none; dmarc=fail\n\nDear Customer,\nWe detected an unusual login on your NetBanking account. Your account will be suspended within 24 hours. Click here to verify your identity and confirm your debit card details: http://hdfcbank.com.verify-login.top/secure" },
-  { label: "Real OTP (safe)", text: "482910 is your OTP for login to HDFC Bank NetBanking. Valid for 5 mins. Do not share this OTP with anyone. If not initiated by you, call 1800-202-6161." },
-  { label: "Normal chat (safe)", text: "Hi! Are we still meeting at the cafe at 6 today? I'll bring the documents for the flat." },
+  { label: "Real OTP (safe)", text: "482910 is your OTP for login to HDFC Bank NetBanking. Valid for 5 mins. Do not share this OTP with anyone. If not initiated by you, call 1800-202-6161.", safe: true },
+  { label: "Normal chat (safe)", text: "Hi! Are we still meeting at the cafe at 6 today? I'll bring the documents for the flat.", safe: true },
 ];
 const LEVEL_TEXT = { low: "Low risk", medium: "Medium risk — be careful", high: "High risk — likely scam" };
+const PARTS = [
+  ["wording", "Wording"], ["language_model", "Language model"], ["links", "Links"],
+  ["email_headers", "Email headers"], ["combinations", "Combined signals"],
+];
 const HISTORY_KEY = "fraudlens.history.v1";
 const PREF_KEY = "fraudlens.keepHistory";
+const GAUGE_C = 2 * Math.PI * 52;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, opts = {}, children = []) => {
@@ -24,16 +30,42 @@ const el = (tag, opts = {}, children = []) => {
   return node;
 };
 
+function countUp(node, to, { decimals = 0, suffix = "", ms = 900 } = {}) {
+  if (reducedMotion) { node.textContent = to.toFixed(decimals) + suffix; return; }
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / ms);
+    const eased = 1 - Math.pow(1 - t, 3);
+    node.textContent = (to * eased).toFixed(decimals) + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function stagger(list) {
+  [...list.children].forEach((c, i) => c.style.setProperty("--i", String(i)));
+}
+
+let stepTimer = null;
 function show(state) {
   $("empty-state").hidden = state !== "empty";
   $("loading").hidden = state !== "loading";
   $("result").hidden = state !== "result";
+  $("field").classList.toggle("scanning", state === "loading");
+  clearInterval(stepTimer);
+  if (state === "loading") {
+    const items = [...$("steps").children];
+    items.forEach((li) => li.classList.remove("on"));
+    let i = 0;
+    items[0].classList.add("on");
+    stepTimer = setInterval(() => { i = Math.min(i + 1, items.length - 1); items[i].classList.add("on"); }, 220);
+  }
 }
 
 function renderSamples() {
   const box = $("samples");
   for (const s of SAMPLES) {
-    const b = el("button", { className: "chip", text: s.label, attrs: { type: "button" } });
+    const b = el("button", { className: s.safe ? "chip safe-sample" : "chip", text: s.label, attrs: { type: "button" } });
     b.addEventListener("click", () => {
       $("content").value = s.text;
       updateCount();
@@ -61,28 +93,56 @@ function indicatorItem(ind) {
   return li;
 }
 
+function renderBreakdown(r) {
+  const b = r.breakdown;
+  const block = $("breakdown-block");
+  if (!b) { block.hidden = true; return; }
+  const positive = PARTS.filter(([k]) => b[k] > 0);
+  const total = positive.reduce((s, [k]) => s + b[k], 0);
+  block.hidden = !positive.length && !b.threat_intel;
+  const bar = $("breakdown-bar");
+  const scale = Math.max(100, total);
+  bar.replaceChildren(...positive.map(([k]) => el("span", { className: `seg ${k}`, attrs: { "data-w": String((b[k] / scale) * 100) } })));
+  bar.setAttribute("aria-label", positive.map(([k, label]) => `${label} ${b[k]} points`).join(", ") || "No points added");
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    for (const seg of bar.children) seg.style.width = `${seg.dataset.w}%`;
+  }));
+  const legend = positive.map(([k, label]) => el("li", { className: `key ${k}` }, [el("span", { text: label }), el("b", { text: `+${b[k]}` })]));
+  const reductions = PARTS.filter(([k]) => b[k] < 0).reduce((s, [k]) => s + b[k], 0);
+  if (reductions < 0) legend.push(el("li", { text: `Reassuring signs: ${reductions}` }));
+  if (b.threat_intel) legend.push(el("li", { text: "Known threat-feed match: score raised to at least 90" }));
+  $("breakdown-legend").replaceChildren(...legend);
+}
+
 function renderResult(r) {
   const v = $("verdict");
+  v.className = "verdict";
+  void v.offsetWidth;
   v.className = `verdict ${r.level}`;
   $("verdict-level").textContent = LEVEL_TEXT[r.level];
   $("verdict-summary").textContent = r.summary;
-  $("score-value").textContent = r.score;
-  const fill = $("meter-fill");
-  fill.className = `meter-fill ${r.level}`;
-  fill.style.width = `${Math.max(3, r.score)}%`;
 
-  const chips = $("scenario-chips");
-  chips.replaceChildren(...r.scenarios.map((s) => el("span", { className: "chip tag", text: s.name })));
+  const fill = $("gauge-fill");
+  fill.style.strokeDasharray = `${GAUGE_C}`;
+  fill.style.strokeDashoffset = `${GAUGE_C}`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fill.style.strokeDashoffset = `${GAUGE_C * (1 - Math.max(2, r.score) / 100)}`;
+  }));
+  countUp($("score-value"), r.score, { ms: 1100 });
+
+  $("scenario-chips").replaceChildren(...r.scenarios.map((s) => el("span", { className: "chip tag", text: s.name })));
+  renderBreakdown(r);
 
   $("advice").replaceChildren(...r.advice.map((a) => el("li", { text: a })));
+  stagger($("advice"));
 
-  const inds = [...r.indicators];
   const list = $("indicators");
-  if (!inds.length && !r.urls.some((u) => u.indicators.length)) {
+  if (!r.indicators.length && !r.urls.some((u) => u.indicators.length)) {
     list.replaceChildren(el("li", { className: "muted", text: "No warning indicators matched." }));
   } else {
-    list.replaceChildren(...inds.map(indicatorItem));
+    list.replaceChildren(...r.indicators.map(indicatorItem));
   }
+  stagger(list);
 
   const emailBlock = $("email-block");
   emailBlock.hidden = !r.email;
@@ -94,8 +154,7 @@ function renderResult(r) {
     }
   }
 
-  const urlBlock = $("url-block");
-  urlBlock.hidden = !r.urls.length;
+  $("url-block").hidden = !r.urls.length;
   $("urls").replaceChildren(...r.urls.map((u) => {
     const card = el("div", { className: "url-card" }, [
       el("div", { className: "url-head" }, [
@@ -106,19 +165,21 @@ function renderResult(r) {
     const facts = [];
     if (u.registered_domain) facts.push(`Real domain: ${u.registered_domain}`);
     if (u.display_host && u.display_host !== u.host) facts.push(`Displays as: ${u.display_host}`);
-    if (u.ml) facts.push(`URL model: ${Math.round(u.ml.probability * 100)}% phishing-like`);
+    if (u.ml) facts.push(`URL model: ${Math.round(u.ml.probability * 100)}% phishing-like` + (u.ml.points ? ` (${u.ml.points > 0 ? "+" : ""}${u.ml.points} pts)` : ""));
     if (u.live) {
       if (u.live.final_url && u.live.final_url !== u.url) facts.push(`Lands on: ${u.live.final_url}`);
       if (u.live.domain_age_days != null) facts.push(`Domain age: ${u.live.domain_age_days} days`);
       if (u.live.error) facts.push(`Live check: ${u.live.error}`);
     }
-    if (facts.length) card.appendChild(el("p", { className: "small muted", text: facts.join(" · ") }));
-    const ul = el("ul", { className: "indicators" }, u.indicators.map(indicatorItem));
-    card.appendChild(ul);
+    if (facts.length) card.appendChild(el("ul", { className: "facts" }, facts.map((f) => el("li", { text: f }))));
+    card.appendChild(el("ul", { className: "indicators" }, u.indicators.map(indicatorItem)));
     return card;
   }));
+  stagger($("urls"));
 
-  $("timing").textContent = `Analysed as ${r.input_type} in ${r.elapsed_ms} ms.`;
+  const note = r.breakdown && r.breakdown.benign_context && r.urls.length
+    ? " The rest of the message reads as harmless, so links were judged on their rule checks only." : "";
+  $("timing").textContent = `Analysed as ${r.input_type} in ${r.elapsed_ms} ms.${note}`;
   show("result");
 }
 
@@ -137,6 +198,8 @@ async function onSubmit(e) {
   btn.disabled = true;
   btn.textContent = "Analysing…";
   show("loading");
+  const minDelay = reducedMotion ? 0 : 700;
+  const started = performance.now();
   try {
     const res = await fetch("/api/analyze", {
       method: "POST",
@@ -145,8 +208,11 @@ async function onSubmit(e) {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : "The analysis failed. Please try again.");
+    const wait = minDelay - (performance.now() - started);
+    if (wait > 0) await new Promise((ok) => setTimeout(ok, wait));
     renderResult(data);
     saveHistory(content, data);
+    if (window.innerWidth < 900) $("result-title").parentElement.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth" });
   } catch (ex) {
     show("empty");
     err.textContent = ex.message || "Network error. Check your connection and try again.";
@@ -182,10 +248,32 @@ function renderHistory() {
       $("content").value = h.content;
       updateCount();
       renderResult(h.result);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
     });
     return el("li", {}, [b]);
   }));
+}
+
+function loadStats() {
+  fetch("/api/report")
+    .then((res) => (res.ok ? res.json() : null))
+    .then((r) => {
+      if (!r || !r.heldout_urls) return;
+      $("stats").hidden = false;
+      countUp($("stat-urls"), r.heldout_urls.recall * 100, { decimals: 1, suffix: "%", ms: 1400 });
+      countUp($("stat-texts"), r.heldout_texts.precision * 100, { decimals: 1, suffix: "%", ms: 1400 });
+      if (r.fresh_feed && r.fresh_feed.recall != null) countUp($("stat-fresh"), r.fresh_feed.recall * 100, { decimals: 1, suffix: "%", ms: 1400 });
+    })
+    .catch(() => {});
+}
+
+function observeFadeIns() {
+  const nodes = document.querySelectorAll(".fade-in");
+  if (!("IntersectionObserver" in window) || reducedMotion) { nodes.forEach((n) => n.classList.add("seen")); return; }
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("seen"); io.unobserve(e.target); }
+  }, { threshold: 0.15 });
+  nodes.forEach((n, i) => { n.style.transitionDelay = `${(i % 4) * 80}ms`; io.observe(n); });
 }
 
 function init() {
@@ -193,6 +281,9 @@ function init() {
   updateCount();
   $("content").addEventListener("input", updateCount);
   $("analyze-form").addEventListener("submit", onSubmit);
+  $("content").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) $("analyze-form").requestSubmit();
+  });
   $("clear-btn").addEventListener("click", () => { $("content").value = ""; updateCount(); show("empty"); $("content").focus(); });
   const keep = localStorage.getItem(PREF_KEY);
   $("history-toggle").checked = keep !== "false";
@@ -203,6 +294,8 @@ function init() {
   $("history-clear").addEventListener("click", () => { localStorage.removeItem(HISTORY_KEY); renderHistory(); });
   renderHistory();
   show("empty");
+  loadStats();
+  observeFadeIns();
 }
 
 document.addEventListener("DOMContentLoaded", init);

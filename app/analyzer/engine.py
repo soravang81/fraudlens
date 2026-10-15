@@ -23,17 +23,26 @@ def _level(score: int) -> str:
     return next(name for cut, name in LEVELS if score >= cut)
 
 
-def _ml_text_points(prob: float) -> int:
-    # A confident model (p >= ~0.81) can reach the medium threshold on its own.
-    if prob >= 0.5:
-        return round((prob - 0.5) * 96)
-    if prob < 0.3:
-        return -round((0.3 - prob) * 20)
+# ML probability -> points: slope * (p - pivot) above the pivot, a small deduction below `low`.
+# Tuned by scripts/tune.py on validation data only (never on the test sets).
+TEXT_ML = {"pivot": 0.4, "slope": 80, "low": 0.3, "low_slope": 20}
+URL_ML = {"pivot": 0.6, "slope": 130, "low": 0.5, "low_slope": 10, "benign_context_factor": 0.0}
+
+
+def _ml_points(prob: float, cfg: dict) -> int:
+    if prob >= cfg["pivot"]:
+        return round((prob - cfg["pivot"]) * cfg["slope"])
+    if prob < cfg["low"]:
+        return -round((cfg["low"] - prob) * cfg["low_slope"])
     return 0
 
 
+def _ml_text_points(prob: float) -> int:
+    return _ml_points(prob, TEXT_ML)
+
+
 def _ml_url_points(prob: float) -> int:
-    return round((prob - 0.5) * 80) if prob >= 0.5 else -round((0.5 - prob) * 10)
+    return _ml_points(prob, URL_ML)
 
 
 def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
@@ -56,20 +65,29 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
     if re.search(r"\bdigital arrest\b", clean, re.I):
         ids.add("digital_arrest")
 
+    ml_text = ml.predict_text(clean) if (use_ml and not is_url_only and len(clean.split()) >= 3) else None
+    # A link inside a message that reads as harmless and asks for nothing gets less weight from the URL model.
+    benign_context = (ml_text is not None and ml_text["probability"] < 0.5 and not (ids & ACTION_IDS)
+                      and sum(h.weight for h in email_hits) <= 0)
+
     url_reports, best_url_points, intel_types = [], 0, set()
     for u in urls:
         parsed, hits, intel_hit = analyze_url(u)
         ml_url = ml.predict_url(u) if use_ml else None
         pts = sum(h.weight for h in hits)
+        ml_pts = 0
         if ml_url:
             ml_pts = _ml_url_points(ml_url["probability"])
             if any(h.id == "reputation" for h in hits) and ml_pts > 0:
                 ml_pts //= 3
+            if benign_context and ml_pts > 0:
+                ml_pts = round(ml_pts * URL_ML["benign_context_factor"])
+            ml_url["points"] = ml_pts
             pts += ml_pts
         live_info = None
         if live and parsed is not None and not parsed.is_ip:
             live_info = _live(u, parsed, hits)
-            pts = sum(h.weight for h in hits) + (ml_pts if ml_url else 0)
+            pts = sum(h.weight for h in hits) + ml_pts
         if intel_hit:
             intel_types.add(intel_hit["type"])
         ids |= {h.id for h in hits}
@@ -89,7 +107,6 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
         })
     ids |= {h.id for h in email_hits}
 
-    ml_text = ml.predict_text(clean) if (use_ml and not is_url_only and len(clean.split()) >= 3) else None
     lang_points = min(70, sum(h.weight for h in text_hits))
     email_points = sum(h.weight for h in email_hits)
     ml_points = _ml_text_points(ml_text["probability"]) if ml_text else 0
@@ -102,7 +119,8 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
         combo += 10
     if "payment_request" in ids and ids & {"job", "prize", "loan", "investment"}:
         combo += 10
-    raw = lang_points + email_points + ml_points + combo + (best_url_points if urls else 0)
+    link_points = best_url_points if urls else 0
+    raw = lang_points + email_points + ml_points + combo + link_points
     score = max(0, min(100, raw))
     if intel_types:
         score = max(score, 90)
@@ -115,7 +133,7 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
         indicators.append({
             "id": "ml_text", "label": f"Machine-learning model: {round(ml_text['probability'] * 100)}% phishing-like language",
             "weight": ml_points, "category": "ml",
-            "explanation": "A model trained on ~16,000 labelled phishing and legitimate messages. Words that pushed the score up: "
+            "explanation": "A model trained on ~14,500 labelled phishing and legitimate messages. Words that pushed the score up: "
                            + (", ".join(f"'{t}'" for t in ml_text["top_terms"][:5]) or "none") + ".",
             "evidence": [],
         })
@@ -125,6 +143,9 @@ def analyze(content: str, *, live: bool = False, use_ml: bool = True) -> dict:
         "level": level,
         "scenarios": [{"id": s, "name": guidance.SCENARIOS[s][0]} for s in scenarios],
         "summary": _summary(level, scenarios, indicators, url_reports),
+        "breakdown": {"wording": lang_points, "email_headers": email_points, "language_model": ml_points,
+                      "combinations": combo, "links": link_points, "threat_intel": bool(intel_types),
+                      "benign_context": benign_context},
         "indicators": indicators,
         "urls": url_reports,
         "email": email_summary,

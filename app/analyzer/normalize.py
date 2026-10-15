@@ -55,13 +55,20 @@ def deobfuscate(text: str) -> str:
 SCHEME_URL_RE = re.compile(r"(?i)\b(?:https?|hxxps?)://[^\s<>\"'`]+")
 
 
+_WORD_TLDS = {"it", "me", "us", "my"}
+
+
 def _is_bare_domain(candidate: str, whole_input: bool) -> bool:
     host = candidate.split("/")[0]
     ext = _SUFFIXES(host)
     if not ext.suffix or not ext.domain:
         return False
-    # Inside running text, missing spaces ("enough.As", "etc.To") look like ccTLD links; a lone domain is unambiguous.
-    return whole_input or ext.suffix in _COMMON_TLDS or "." in ext.suffix
+    if whole_input:
+        return True
+    # Inside running text, missing spaces ("enough.As", "message.it") look like ccTLD links.
+    if ext.suffix in _WORD_TLDS:
+        return "/" in candidate or bool(re.search(r"[-\d]", ext.domain)) or bool(ext.subdomain)
+    return ext.suffix in _COMMON_TLDS or "." in ext.suffix
 
 
 def extract_urls(text: str) -> list[str]:

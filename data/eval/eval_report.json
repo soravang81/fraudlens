@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-15T13:51:05+00:00",
+  "generated_at": "2026-10-15T14:53:16+00:00",
   "flag_threshold": 30,
   "scenarios": {
     "full": {
@@ -16,23 +16,23 @@
       "false_negative_rate": 0.0,
       "high_only": {
         "n": 110,
-        "tp": 51,
+        "tp": 49,
         "tn": 50,
         "fp": 0,
-        "fn": 9,
+        "fn": 11,
         "precision": 1.0,
-        "recall": 0.85,
-        "f1": 0.9189,
-        "accuracy": 0.9182,
+        "recall": 0.8167,
+        "f1": 0.8991,
+        "accuracy": 0.9,
         "false_positive_rate": 0.0,
-        "false_negative_rate": 0.15
+        "false_negative_rate": 0.1833
       },
       "errors": [
         {
           "id": "s05",
           "type": "false_positive",
           "category": "bank_alert_legit",
-          "score": 32,
+          "score": 34,
           "level": "medium",
           "text": "Your a/c no. XXXXXXXX5678 is credited by Rs 45,000.00 on 01-10-26 by a/c linked to mobile 9XXXXXX123 (IMPS Ref no 627412345678). - Kotak Bank",
           "top_reasons": [
@@ -44,20 +44,20 @@
           "id": "s06",
           "type": "false_positive",
           "category": "bank_alert_legit",
-          "score": 44,
+          "score": 45,
           "level": "medium",
           "text": "Dear Customer, your ICICI Bank credit card statement for September is ready. Total due Rs 12,340, minimum due Rs 620, due date 05-Nov-2026. Pay via iMobile or i",
           "top_reasons": [
             "Mentions a bank or payment app",
             "Generic greeting",
-            "Machine-learning model: 84% phishing-like language"
+            "Machine-learning model: 83% phishing-like language"
           ]
         },
         {
           "id": "s07",
           "type": "false_positive",
           "category": "bank_alert_legit",
-          "score": 32,
+          "score": 39,
           "level": "medium",
           "text": "SBI: Your KYC is due for periodic update as per RBI norms. Please visit your home branch or update through the YONO app. SBI never asks for your password, PIN o",
           "top_reasons": [
@@ -70,7 +70,7 @@
           "id": "s10",
           "type": "false_positive",
           "category": "delivery_legit",
-          "score": 32,
+          "score": 33,
           "level": "medium",
           "text": "Your Swiggy order from Domino's is out for delivery. Your delivery partner Ramesh will reach you in 15 mins.",
           "top_reasons": [
@@ -81,18 +81,18 @@
           "id": "s46",
           "type": "false_positive",
           "category": "email_legit",
-          "score": 43,
+          "score": 44,
           "level": "medium",
           "text": "From: GitHub <noreply@github.com>\nSubject: [GitHub] A new SSH key was added to your account\nAuthentication-Results: mx.google.com; spf=pass; dkim=pass; dmarc=pa",
           "top_reasons": [
-            "Machine-learning model: 94% phishing-like language"
+            "Machine-learning model: 95% phishing-like language"
           ]
         },
         {
           "id": "s49",
           "type": "false_positive",
           "category": "personal",
-          "score": 38,
+          "score": 37,
           "level": "medium",
           "text": "Can you send me the OTP-free link for the zoom meeting? The one you shared yesterday expired.",
           "top_reasons": [
@@ -216,9 +216,9 @@
         }
       },
       "latency_ms": {
-        "mean": 3.69,
-        "p95": 3.06,
-        "max": 230.7
+        "mean": 1.68,
+        "p95": 2.94,
+        "max": 54.22
       }
     },
     "rules_only": {
@@ -476,9 +476,9 @@
         }
       },
       "latency_ms": {
-        "mean": 0.97,
-        "p95": 2.6,
-        "max": 3.62
+        "mean": 0.93,
+        "p95": 2.38,
+        "max": 3.48
       }
     },
     "description": "110 hand-written, labelled Indian-context messages, emails and URLs (60 malicious incl. obfuscated/modified variants, 50 legitimate incl. real OTP/bank alerts). Flagged = score >= 30."
@@ -487,27 +487,27 @@
     "full": {
       "n": 45,
       "tp": 20,
-      "tn": 20,
-      "fp": 3,
+      "tn": 19,
+      "fp": 4,
       "fn": 2,
-      "precision": 0.8696,
+      "precision": 0.8333,
       "recall": 0.9091,
-      "f1": 0.8889,
-      "accuracy": 0.8889,
-      "false_positive_rate": 0.1304,
+      "f1": 0.8696,
+      "accuracy": 0.8667,
+      "false_positive_rate": 0.1739,
       "false_negative_rate": 0.0909,
       "high_only": {
         "n": 45,
-        "tp": 15,
+        "tp": 16,
         "tn": 22,
         "fp": 1,
-        "fn": 7,
-        "precision": 0.9375,
-        "recall": 0.6818,
-        "f1": 0.7895,
-        "accuracy": 0.8222,
+        "fn": 6,
+        "precision": 0.9412,
+        "recall": 0.7273,
+        "f1": 0.8205,
+        "accuracy": 0.8444,
         "false_positive_rate": 0.0435,
-        "false_negative_rate": 0.3182
+        "false_negative_rate": 0.2727
       },
       "errors": [
         {
@@ -525,23 +525,23 @@
           "id": "h20",
           "type": "false_negative",
           "category": "novel_modified",
-          "score": 18,
+          "score": 23,
           "level": "low",
           "text": "Sir, I'm calling from your credit card department. Your card limit is increased to 3 lakh free. Just tell me the code you just received to activate it.",
           "top_reasons": [
-            "Machine-learning model: 79% phishing-like language"
+            "Machine-learning model: 81% phishing-like language"
           ]
         },
         {
           "id": "h24",
           "type": "false_positive",
           "category": "otp_legit",
-          "score": 35,
+          "score": 36,
           "level": "medium",
           "text": "OTP for your Flipkart order delivery is 4192. Share it with the delivery agent only when you receive your package.",
           "top_reasons": [
             "Mentions a well-known company",
-            "Machine-learning model: 92% phishing-like language"
+            "Machine-learning model: 93% phishing-like language"
           ]
         },
         {
@@ -558,16 +558,29 @@
           ]
         },
         {
+          "id": "h37",
+          "type": "false_positive",
+          "category": "awareness_legit",
+          "score": 33,
+          "level": "medium",
+          "text": "Beware of fraud calls claiming to be from the police or CBI. There is no 'digital arrest' in law. Report such calls on 1930. - Issued in public interest",
+          "top_reasons": [
+            "Threat of account block, penalty or arrest",
+            "Mentions a government body",
+            "Machine-learning model: 52% phishing-like language"
+          ]
+        },
+        {
           "id": "h45",
           "type": "false_positive",
           "category": "service_legit",
-          "score": 49,
+          "score": 55,
           "level": "medium",
           "text": "Your Aadhaar-PAN link status: your PAN is already linked with Aadhaar. No action is required.",
           "top_reasons": [
             "KYC / PAN / Aadhaar update demand",
             "Mentions a government body",
-            "Machine-learning model: 72% phishing-like language"
+            "Machine-learning model: 74% phishing-like language"
           ]
         }
       ],
@@ -654,7 +667,7 @@
         },
         "awareness_legit": {
           "n": 1,
-          "correct": 1
+          "correct": 0
         },
         "url_legit": {
           "n": 5,
@@ -666,9 +679,9 @@
         }
       },
       "latency_ms": {
-        "mean": 1.14,
-        "p95": 2.75,
-        "max": 4.3
+        "mean": 1.12,
+        "p95": 2.81,
+        "max": 3.36
       }
     },
     "rules_only": {
@@ -882,63 +895,63 @@
         }
       },
       "latency_ms": {
-        "mean": 0.97,
-        "p95": 2.53,
-        "max": 3.67
+        "mean": 0.94,
+        "p95": 2.57,
+        "max": 3.13
       }
     },
     "description": "45 hand-written, labelled Indian-context messages, emails and URLs (22 malicious incl. obfuscated/modified variants, 23 legitimate incl. real OTP/bank alerts). Flagged = score >= 30."
   },
   "heldout_urls": {
     "n": 2000,
-    "tp": 768,
-    "tn": 983,
-    "fp": 17,
-    "fn": 232,
-    "precision": 0.9783,
-    "recall": 0.768,
-    "f1": 0.8605,
-    "accuracy": 0.8755,
-    "false_positive_rate": 0.017,
-    "false_negative_rate": 0.232,
+    "tp": 826,
+    "tn": 980,
+    "fp": 20,
+    "fn": 174,
+    "precision": 0.9764,
+    "recall": 0.826,
+    "f1": 0.8949,
+    "accuracy": 0.903,
+    "false_positive_rate": 0.02,
+    "false_negative_rate": 0.174,
     "examples_false_positive": [
       {
-        "url": "nccomm.com/",
-        "score": 33
+        "url": "bodydocchiropractic.com/",
+        "score": 30
       },
       {
         "url": "cheapseagulllargo1314inchoutdoor6.tk/client-issue-omcmanager-tarantella",
-        "score": 43
-      },
-      {
-        "url": "https://http2.github.io/http2-spec/",
         "score": 46
       },
       {
+        "url": "midisland.bcvirtualtour.com/5664MalibuTr-Nanaimo/",
+        "score": 45
+      },
+      {
+        "url": "https://http2.github.io/http2-spec/",
+        "score": 30
+      },
+      {
         "url": "https://www.microstockgroup.com/general-stock-discussion/payment-option-paypal-or-moneybookers/25/",
-        "score": 38
+        "score": 37
       },
       {
-        "url": "http://www.ectraining.com.hk/B885/b885tc.doc",
-        "score": 33
-      },
-      {
-        "url": "www.datasafestorage-uk.com/datasafe/",
-        "score": 41
-      },
-      {
-        "url": "http://gofiveguys.com/",
+        "url": "cj-dudek.blogspot.com/",
         "score": 36
       },
       {
-        "url": "http://www.healthtech.com/09/cgh/",
-        "score": 47
+        "url": "http://www.ectraining.com.hk/B885/b885tc.doc",
+        "score": 55
+      },
+      {
+        "url": "alphaomegaarts.intuitwebsites.com/",
+        "score": 51
       }
     ],
     "examples_false_negative": [
       {
         "url": "drbobbierendon.com/sreenname/index.htm",
-        "score": 1
+        "score": 2
       },
       {
         "url": "davidphillips.us/weql90x",
@@ -946,84 +959,86 @@
       },
       {
         "url": "https://hqcbdofficer.com",
-        "score": 22
-      },
-      {
-        "url": "http://amcgardiennage.com/P2w9ZSZpPTFBN1M3STNhOFo0YQ==",
-        "score": 10
-      },
-      {
-        "url": "centralcoast.team",
-        "score": 4
-      },
-      {
-        "url": "eiyuxrs.com",
         "score": 27
       },
       {
-        "url": "cherrycreekchorale.org/wp-content/uploads/nginx.sample.html",
-        "score": 28
+        "url": "http://amcgardiennage.com/P2w9ZSZpPTFBN1M3STNhOFo0YQ==",
+        "score": 12
       },
       {
         "url": "vfinitylife.com",
-        "score": 0
+        "score": 1
+      },
+      {
+        "url": "adielvenezuela.com",
+        "score": 21
+      },
+      {
+        "url": "https://thescferewkewi32.org/hfi-pgh-org/pi",
+        "score": 25
+      },
+      {
+        "url": "la-biquetterie.com",
+        "score": 17
       }
     ],
     "description": "1000 phishing + 1000 legitimate URLs from the public dataset that were NOT used in training; threat-intel lookup disabled."
   },
   "fresh_feed": {
     "n": 300,
-    "detected": 228,
-    "recall": 0.76,
+    "detected": 249,
+    "recall": 0.83,
     "feed_date": "2026-10-14T10:28:58+00:00",
     "description": "Live OpenPhish phishing URLs, scored with the threat-intel lookup disabled, to measure detection of new attacks the models never saw."
   },
   "heldout_texts": {
     "n": 1000,
-    "tp": 308,
-    "tn": 598,
-    "fp": 26,
-    "fn": 68,
-    "precision": 0.9222,
-    "recall": 0.8191,
-    "f1": 0.8676,
-    "accuracy": 0.906,
-    "false_positive_rate": 0.0417,
-    "false_negative_rate": 0.1809,
+    "tp": 311,
+    "tn": 612,
+    "fp": 12,
+    "fn": 65,
+    "precision": 0.9628,
+    "recall": 0.8271,
+    "f1": 0.8898,
+    "accuracy": 0.923,
+    "false_positive_rate": 0.0192,
+    "false_negative_rate": 0.1729,
     "description": "1000 held-out emails/SMS from the public text dataset (same split as the ML test set), full pipeline."
   },
   "ml_models": {
     "text": {
       "n": 4028,
-      "precision": 0.9601,
-      "recall": 0.9726,
-      "f1": 0.9663,
-      "roc_auc": 0.9969,
-      "accuracy": 0.9742,
-      "tp": 1493,
-      "tn": 2431,
-      "fp": 62,
-      "fn": 42,
-      "false_positive_rate": 0.0249,
-      "false_negative_rate": 0.0274,
-      "dataset": "ealvaradob/phishing-dataset texts.json (emails + SMS), 80/20 stratified split, seed 42",
-      "train_seconds": 72.1
+      "precision": 0.9607,
+      "recall": 0.9707,
+      "f1": 0.9657,
+      "roc_auc": 0.9966,
+      "accuracy": 0.9737,
+      "tp": 1490,
+      "tn": 2432,
+      "fp": 61,
+      "fn": 45,
+      "false_positive_rate": 0.0245,
+      "false_negative_rate": 0.0293,
+      "recall_at_1pct_fpr": 0.9368,
+      "dataset": "ealvaradob/phishing-dataset texts.json (emails + SMS); 80/20 stratified split (seed 42), 10% of the train part held back for score tuning; trained on 14498",
+      "train_seconds": 18.3
     },
     "url": {
       "n": 60000,
-      "precision": 0.9295,
-      "recall": 0.941,
-      "f1": 0.9352,
-      "roc_auc": 0.9869,
-      "accuracy": 0.939,
-      "tp": 26406,
-      "tn": 29935,
-      "fp": 2004,
-      "fn": 1655,
-      "false_positive_rate": 0.0627,
-      "false_negative_rate": 0.059,
-      "dataset": "ealvaradob/phishing-dataset urls.json, random 300000 URLs, 80/20 stratified split, seed 42; scheme and www. stripped",
-      "train_seconds": 195.1
+      "precision": 0.9518,
+      "recall": 0.9643,
+      "f1": 0.958,
+      "roc_auc": 0.9942,
+      "accuracy": 0.9604,
+      "tp": 27095,
+      "tn": 30531,
+      "fp": 1372,
+      "fn": 1002,
+      "false_positive_rate": 0.043,
+      "false_negative_rate": 0.0357,
+      "recall_at_1pct_fpr": 0.8825,
+      "dataset": "ealvaradob/phishing-dataset urls.json; trained on 755697 URLs, tested on 60000 never-seen URLs; scheme and www. stripped; character 3-5-grams + host/path word tokens",
+      "train_seconds": 225.5
     }
   },
   "intel": {
@@ -1043,7 +1058,9 @@
   },
   "limitations": [
     "Both scenario sets were written by the developers and are small (110 + 45 items). The development set was used for tuning, so its scores are optimistic; the 45-item held-out set is the fairer estimate, but its confidence interval is wide (roughly \u00b110 points).",
-    "After the held-out set was first run, the weight of the text-ML score was raised (64 to 96 points per unit probability) because the public held-out texts showed the model was confident on phishing the score discarded (recall 37% to 82%). That choice was made after seeing these sets, so all reported numbers are mildly optimistic; the cost was more false alarms on hand-written legitimate bank-style messages.",
+    "How ML probabilities become risk points was tuned by scripts/tune.py on validation data only (20,000 URLs and 1,611 texts that are in neither the training nor the test data), with the development scenario set as a guard (no misses, at most 6 false alarms). Earlier versions of these weights were adjusted after looking at the held-out and public test sets, so those sets are not perfectly untouched; this is a mild optimism, not a leak of test items into training.",
+    "The development set's genuine bank and delivery alerts are what limit recall: weighting the text model more heavily catches more phishing emails but flags 12-18 of its 50 legitimate messages.",
+    "A link inside a message that otherwise reads as harmless (low text-model score, no request to click, pay, call or share) gets no points from the URL model, only from the URL rules. This removed most false alarms on old legitimate emails, but a phishing link sent with completely innocent wording is judged on its URL rules alone.",
     "Exact misses and false alarms on the held-out set are listed in section 1; they include UPI 'collect request' tricks worded without fee/PIN keywords and genuine bank status messages that read like alerts.",
     "The public training data is mostly English email (Enron-era ham vs phishing); Indian SMS/WhatsApp scams are covered mainly by the rules, so new scam scripts that avoid known phrases rely on the URL checks and ML.",
     "The text model reacts to banking vocabulary, so genuine bank messages without a 'never share your OTP' line can score medium. Rules reduce but don't eliminate this.",
@@ -1052,5 +1069,5 @@
     "The live link check reveals the server's IP to the link owner and can be fooled by sites that cloak (show different content to scanners). It is off by default.",
     "Only text is analysed: images, voice calls, QR-code images and attachments are not."
   ],
-  "runtime_seconds": 15.9
+  "runtime_seconds": 16.1
 }
