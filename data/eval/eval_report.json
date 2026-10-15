@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T11:02:57+00:00",
+  "generated_at": "2026-10-15T13:51:05+00:00",
   "flag_threshold": 30,
   "scenarios": {
     "full": {
@@ -216,9 +216,9 @@
         }
       },
       "latency_ms": {
-        "mean": 11.67,
-        "p95": 15.5,
-        "max": 768.89
+        "mean": 3.69,
+        "p95": 3.06,
+        "max": 230.7
       }
     },
     "rules_only": {
@@ -476,9 +476,9 @@
         }
       },
       "latency_ms": {
-        "mean": 3.32,
-        "p95": 7.74,
-        "max": 91.9
+        "mean": 0.97,
+        "p95": 2.6,
+        "max": 3.62
       }
     },
     "description": "110 hand-written, labelled Indian-context messages, emails and URLs (60 malicious incl. obfuscated/modified variants, 50 legitimate incl. real OTP/bank alerts). Flagged = score >= 30."
@@ -666,9 +666,9 @@
         }
       },
       "latency_ms": {
-        "mean": 3.12,
-        "p95": 4.03,
-        "max": 45.97
+        "mean": 1.14,
+        "p95": 2.75,
+        "max": 4.3
       }
     },
     "rules_only": {
@@ -882,25 +882,25 @@
         }
       },
       "latency_ms": {
-        "mean": 2.74,
-        "p95": 4.62,
-        "max": 56.31
+        "mean": 0.97,
+        "p95": 2.53,
+        "max": 3.67
       }
     },
     "description": "45 hand-written, labelled Indian-context messages, emails and URLs (22 malicious incl. obfuscated/modified variants, 23 legitimate incl. real OTP/bank alerts). Flagged = score >= 30."
   },
   "heldout_urls": {
     "n": 2000,
-    "tp": 710,
-    "tn": 984,
-    "fp": 16,
-    "fn": 290,
-    "precision": 0.978,
-    "recall": 0.71,
-    "f1": 0.8227,
-    "accuracy": 0.847,
-    "false_positive_rate": 0.016,
-    "false_negative_rate": 0.29,
+    "tp": 768,
+    "tn": 983,
+    "fp": 17,
+    "fn": 232,
+    "precision": 0.9783,
+    "recall": 0.768,
+    "f1": 0.8605,
+    "accuracy": 0.8755,
+    "false_positive_rate": 0.017,
+    "false_negative_rate": 0.232,
     "examples_false_positive": [
       {
         "url": "nccomm.com/",
@@ -954,11 +954,7 @@
       },
       {
         "url": "centralcoast.team",
-        "score": 0
-      },
-      {
-        "url": "ctt.ac",
-        "score": 0
+        "score": 4
       },
       {
         "url": "eiyuxrs.com",
@@ -967,6 +963,10 @@
       {
         "url": "cherrycreekchorale.org/wp-content/uploads/nginx.sample.html",
         "score": 28
+      },
+      {
+        "url": "vfinitylife.com",
+        "score": 0
       }
     ],
     "description": "1000 phishing + 1000 legitimate URLs from the public dataset that were NOT used in training; threat-intel lookup disabled."
@@ -1052,5 +1052,5 @@
     "The live link check reveals the server's IP to the link owner and can be fooled by sites that cloak (show different content to scanners). It is off by default.",
     "Only text is analysed: images, voice calls, QR-code images and attachments are not."
   ],
-  "runtime_seconds": 48.5
+  "runtime_seconds": 15.9
 }

@@ -2,6 +2,10 @@
 import re
 import unicodedata
 
+import tldextract
+
+_SUFFIXES = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None)
+
 URL_RE = re.compile(
     r"""(?ix)
     \b(
@@ -14,7 +18,7 @@ EMAIL_RE = re.compile(r"\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b")
 PHONE_RE = re.compile(r"(?<!\d)(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}(?!\d)")
 
 # Domains the URL regex can confuse with file names or abbreviations.
-_NOT_URL_SUFFIXES = (".jpg", ".png", ".pdf", ".doc", ".docx", ".xls", ".txt", ".exe", ".apk")
+_NOT_URL_SUFFIXES = (".jpg", ".png", ".pdf", ".doc", ".docx", ".xls", ".txt", ".exe", ".apk", ".py", ".js", ".md", ".sh", ".csv", ".json")
 _COMMON_TLDS = {
     "com", "net", "org", "in", "co", "io", "info", "biz", "xyz", "top", "online", "site", "live", "app",
     "me", "us", "uk", "ru", "cn", "tk", "ml", "ga", "cf", "gq", "club", "shop", "store", "link", "click",
@@ -51,20 +55,28 @@ def deobfuscate(text: str) -> str:
 SCHEME_URL_RE = re.compile(r"(?i)\b(?:https?|hxxps?)://[^\s<>\"'`]+")
 
 
+def _is_bare_domain(candidate: str, whole_input: bool) -> bool:
+    host = candidate.split("/")[0]
+    ext = _SUFFIXES(host)
+    if not ext.suffix or not ext.domain:
+        return False
+    # Inside running text, missing spaces ("enough.As", "etc.To") look like ccTLD links; a lone domain is unambiguous.
+    return whole_input or ext.suffix in _COMMON_TLDS or "." in ext.suffix
+
+
 def extract_urls(text: str) -> list[str]:
     # Links with a scheme first, so 'http://google.com@evil.ru' isn't mistaken for an email address.
     urls = [m.group(0).rstrip(".,;:!?)]}>'\"") for m in SCHEME_URL_RE.finditer(text)]
     rest = SCHEME_URL_RE.sub(" ", text)
     without_emails = EMAIL_RE.sub(" ", rest)
+    whole = text.strip()
     for m in URL_RE.finditer(without_emails):
         u = m.group(1).rstrip(".,;:!?)]}>'\"")
         low = u.lower()
         if low.endswith(_NOT_URL_SUFFIXES) and "/" not in low:
             continue
-        if "://" not in low and not low.startswith("www."):
-            tld = low.split("/")[0].rsplit(".", 1)[-1]
-            if tld not in _COMMON_TLDS:
-                continue
+        if "://" not in low and not low.startswith("www.") and not _is_bare_domain(low, u == whole):
+            continue
         if u not in urls:
             urls.append(u)
     return urls

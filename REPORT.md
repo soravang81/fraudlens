@@ -1,6 +1,6 @@
 # FraudLens evaluation report
 
-Generated 2026-10-14T11:02:57+00:00. Flagged = risk score ≥ 30 (medium or high).
+Generated 2026-10-15T13:51:05+00:00. Flagged = risk score ≥ 30 (medium or high).
 
 ## 1. Held-out scenario set (headline result)
 
@@ -27,8 +27,8 @@ Errors on the held-out set:
 
 | Pipeline | Precision | Recall | F1 | False positives | False negatives | Mean latency |
 |---|---|---|---|---|---|---|
-| Rules + ML + URL analysis (full) | 90.9% | 100.0% | 95.2% | 6 of 50 | 0 of 60 | 11.67 ms |
-| Rules + URL analysis only (no ML) | 98.1% | 85.0% | 91.1% | 1 of 50 | 9 of 60 | 3.32 ms |
+| Rules + ML + URL analysis (full) | 90.9% | 100.0% | 95.2% | 6 of 50 | 0 of 60 | 3.69 ms |
+| Rules + URL analysis only (no ML) | 98.1% | 85.0% | 91.1% | 1 of 50 | 9 of 60 | 0.97 ms |
 
 Errors made by the full pipeline:
 
@@ -45,7 +45,7 @@ Errors made by the full pipeline:
 
 | Test | N | Precision | Recall | F1 | FPR | FNR |
 |---|---|---|---|---|---|---|
-| Unseen dataset URLs | 2000 | 97.8% | 71.0% | 82.3% | 1.6% | 29.0% |
+| Unseen dataset URLs | 2000 | 97.8% | 76.8% | 86.1% | 1.7% | 23.2% |
 | Held-out emails/SMS | 1000 | 92.2% | 81.9% | 86.8% | 4.2% | 18.1% |
 
 **New attacks:** of 300 live OpenPhish URLs (feed fetched 2026-10-14T10:28:58+00:00), 228 were flagged (76.0%) without using the feed itself.
